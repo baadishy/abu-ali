@@ -421,6 +421,29 @@ export function Admin() {
     }
   };
 
+  const addHotlineNumber = () => {
+    setSiteSettings(prev => {
+      if (!prev) return prev;
+      return { ...prev, hotlineNumbers: [...(prev.hotlineNumbers || []), ""] };
+    });
+  };
+
+  const updateHotlineNumber = (index: number, value: string) => {
+    setSiteSettings(prev => {
+      if (!prev) return prev;
+      const hotlineNumbers = [...(prev.hotlineNumbers || [])];
+      hotlineNumbers[index] = value;
+      return { ...prev, hotlineNumbers };
+    });
+  };
+
+  const removeHotlineNumber = (index: number) => {
+    setSiteSettings(prev => {
+      if (!prev) return prev;
+      return { ...prev, hotlineNumbers: (prev.hotlineNumbers || []).filter((_, i) => i !== index) };
+    });
+  };
+
   const fetchItems = async () => {
     try {
       const res = await fetch("/api/admin/menu");
@@ -1019,8 +1042,8 @@ export function Admin() {
   }
 
   return (
-    <div className={cn("min-h-screen bg-black text-white p-4 md:p-12 font-sans pt-24 md:pt-32 overflow-x-hidden", isRTL && "font-arabic")}>
-      <div className="max-w-screen-2xl mx-auto">
+    <div className={cn("min-h-screen bg-black text-white p-4 md:p-12 xl:p-16 2xl:p-24 3xl:p-32 font-sans pt-24 md:pt-32 overflow-x-hidden", isRTL && "font-arabic")}>
+      <div className="max-w-screen-3xl mx-auto">
         <header className={cn("flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-12", isRTL && "md:flex-row-reverse text-right")}>
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-black mb-2 italic uppercase tracking-tighter">
@@ -1057,16 +1080,17 @@ export function Admin() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-8 md:gap-12">
+        <div className="space-y-8">
           {activeTab === "menu" && (
             <motion.div 
               key="menu"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="lg:col-span-3 xl:col-span-4 grid grid-cols-1 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-6 gap-8 md:gap-12"
+              className="w-full grid grid-cols-1"
             >
-              <div className="lg:col-span-1 xl:col-span-1">
-                <div className="bg-[#1A1A1A] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-white/5 sticky top-32">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+                <div className="lg:col-span-4 xl:col-span-3">
+                  <div className="bg-[#1A1A1A] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-white/5 sticky top-32">
                   <h2 className="text-xl font-black italic uppercase mb-6">{editingItem ? t.editFuel : t.newFuel}</h2>
                   <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                     <div className="space-y-4">
@@ -1303,7 +1327,7 @@ export function Admin() {
                   </form>
                 </div>
               </div>
-              <div className="lg:col-span-2 xl:col-span-3 2xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+                <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 md:gap-6">
                 {items.map(item => (
                   <motion.div 
                     layout
@@ -1364,11 +1388,12 @@ export function Admin() {
                   </motion.div>
                 ))}
               </div>
-            </motion.div>
-          )}
+            </div>
+          </motion.div>
+        )}
 
           {activeTab === "orders" && (
-            <motion.div key="orders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="lg:col-span-3 xl:col-span-4 space-y-10 md:space-y-16">
+            <motion.div key="orders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full space-y-10 md:space-y-16">
               <div className={cn("flex flex-col sm:flex-row items-center gap-4 border-b border-white/5 pb-8", isRTL && "sm:flex-row-reverse")}>
                  <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
                     <Package className="text-black" size={24} />
@@ -1426,7 +1451,7 @@ export function Admin() {
           )}
 
           {activeTab === "users" && (
-            <div className="lg:col-span-3 xl:col-span-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 3xl:grid-cols-8 gap-4 md:gap-6">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-7 gap-4 md:gap-6">
                {customers.map(c => (
                  <div key={c._id} className="bg-[#1A1A1A] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 hover:border-primary/20 transition-all">
                    <h3 className="font-black text-lg md:text-xl italic uppercase mb-1 truncate">{c.name}</h3>
@@ -1447,7 +1472,7 @@ export function Admin() {
           )}
 
           {activeTab === "offers" && (
-            <motion.div key="offers" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-3 grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-12">
+            <motion.div key="offers" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-12">
               <div className="xl:col-span-4 space-y-6">
                 <div className="bg-[#1A1A1A] p-6 md:p-8 rounded-[2rem] border border-white/5 space-y-6">
                   <div className="flex items-center gap-4 mb-2">
@@ -1757,10 +1782,10 @@ export function Admin() {
           )}
 
           {activeTab === "settings" && (
-            <motion.div key="settings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-screen-2xl mx-auto px-4 pb-24 sm:pb-20">
-              <form onSubmit={handleUpdateSettings} className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start">
+            <motion.div key="settings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full pb-24 sm:pb-20">
+              <form onSubmit={handleUpdateSettings} className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 2xl:gap-16 items-start">
                 {/* Left Column: Core & Social */}
-                <div className="lg:col-span-7 space-y-6 md:space-y-8">
+                <div className="lg:col-span-7 xl:col-span-8 space-y-6 md:space-y-8 2xl:space-y-12">
                   <div className="bg-[#1A1A1A] p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-white/5 space-y-6">
                     <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}>
                       <SettingsIcon size={20} className="text-primary" /> {isRTL ? "الإعدادات الأساسية" : "Core Engine"}
@@ -1796,7 +1821,52 @@ export function Admin() {
                       </div>
                     </div>
 
-                    <div className="pt-6 space-y-6 border-t border-white/5">
+                      <div className="space-y-4 pb-6 border-b border-white/5">
+                        <div className={cn("flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5", isRTL && "flex-row-reverse")}>
+                          <div>
+                            <p className="text-sm font-bold uppercase italic tracking-wider">{t.open24Hours}</p>
+                            <p className="text-[10px] opacity-40 uppercase font-black">{isRTL ? "تجاوز ساعات العمل المحددة" : "Override specific opening times"}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSiteSettings(s => s ? {...s, isOpen24Hours: !s.isOpen24Hours} : null)}
+                            className={cn(
+                              "w-12 h-6 rounded-full p-1 transition-all relative overflow-hidden",
+                              siteSettings?.isOpen24Hours ? "bg-primary" : "bg-white/10"
+                            )}
+                          >
+                            <motion.div 
+                              animate={{ x: siteSettings?.isOpen24Hours ? (isRTL ? -24 : 24) : 0 }}
+                              className="w-4 h-4 bg-white rounded-full shadow-lg"
+                            />
+                          </button>
+                        </div>
+
+                        {!siteSettings?.isOpen24Hours && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black uppercase opacity-40 italic">{t.openingTime}</label>
+                              <input 
+                                placeholder="e.g. 11:00 AM" 
+                                className="w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all font-mono" 
+                                value={siteSettings?.openingTime || ""} 
+                                onChange={e => setSiteSettings(s => s ? {...s, openingTime: e.target.value} : null)} 
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className={cn("text-[10px] font-black uppercase opacity-40 italic", isRTL && "text-right block")}>{t.closingTime}</label>
+                              <input 
+                                placeholder="e.g. 02:00 AM" 
+                                className={cn("w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all font-mono", isRTL && "text-right")} 
+                                value={siteSettings?.closingTime || ""} 
+                                onChange={e => setSiteSettings(s => s ? {...s, closingTime: e.target.value} : null)} 
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="pt-6 space-y-6 border-t border-white/5">
                       <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}><Globe className="text-primary" size={20} /> {t.socialMedia}</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
@@ -1815,6 +1885,40 @@ export function Admin() {
                           <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">TikTok</label>
                           <input placeholder="TikTok URL" className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary" value={siteSettings?.socialLinks?.tiktok || ""} onChange={e => setSiteSettings(s => s ? {...s, socialLinks: {...(s.socialLinks || {}), tiktok: e.target.value}} : null)} />
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/5 p-6 rounded-3xl space-y-4">
+                      <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                        <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}>
+                          <Phone className="text-primary" size={20} /> {isRTL ? "أرقام الخط الساخن" : "Hotline Numbers"}
+                        </h3>
+                        <button 
+                          type="button" 
+                          onClick={addHotlineNumber} 
+                          className="p-2 bg-primary text-black rounded-lg hover:scale-105 active:scale-95 transition-all"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {(siteSettings?.hotlineNumbers || []).map((number, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <input 
+                              placeholder={isRTL ? "رقم الهاتف" : "Phone Number"} 
+                              className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary font-mono" 
+                              value={number} 
+                              onChange={e => updateHotlineNumber(idx, e.target.value)} 
+                            />
+                            <button 
+                              type="button" 
+                              onClick={() => removeHotlineNumber(idx)} 
+                              className="p-4 text-red-500 bg-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95 shrink-0"
+                            >
+                              <X size={16}/>
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -2025,12 +2129,12 @@ export function Admin() {
                 </div>
 
                 {/* Right Column: Featured & Delivery */}
-                <div className="lg:col-span-5 space-y-6 md:space-y-8">
+                <div className="lg:col-span-5 xl:col-span-4 space-y-6 md:space-y-8 2xl:space-y-12">
                   <div className="bg-[#1A1A1A] p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-white/5 space-y-6 sticky lg:top-24">
                     <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}><Utensils className="text-primary" size={20} /> {isRTL ? "الساندوتش المميز" : "Hero Sandwich"}</h3>
                     <div className="space-y-4">
                       <label className={cn("text-[10px] font-black uppercase opacity-40 block", isRTL && "text-right")}>Select Hero Sandwich</label>
-                      <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-3 max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] overflow-y-auto p-2 no-scrollbar">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-2 gap-3 max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] xl:max-h-[600px] overflow-y-auto p-2 no-scrollbar">
                         {items.filter(item => item.category === "Burger").map(item => (
                           <div 
                             key={item._id}

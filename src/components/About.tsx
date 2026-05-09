@@ -28,6 +28,41 @@ export function About({ settings }: AboutProps) {
           <h3 className="text-lg md:text-xl font-black text-primary uppercase tracking-widest">{t.ourLocation}</h3>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+            <div className="bg-primary/5 border border-primary/20 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 flex items-center justify-between group overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-12 bg-primary/10 rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-primary/20 transition-all" />
+              <div className="relative z-10 w-full">
+                <h3 className="text-lg md:text-xl font-black text-primary uppercase tracking-widest mb-6">
+                  {isRTL ? "ساعات العمل" : "Operating Hours"}
+                </h3>
+                {settings?.isOpen24Hours ? (
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase opacity-40 tracking-widest">{isRTL ? "الحالة" : "Status"}</p>
+                    <p className="text-3xl md:text-4xl font-mono font-black italic tracking-tighter text-white uppercase">
+                      {isRTL ? "مفتوح 24 ساعة" : "Open 24 Hours"}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-8 sm:gap-16">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black uppercase opacity-40 tracking-widest">{t.openingTime}</p>
+                      <p className="text-2xl md:text-3xl font-mono font-black italic tracking-tighter text-white">
+                        {settings?.openingTime || "11:00 AM"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black uppercase opacity-40 tracking-widest">{t.closingTime}</p>
+                      <p className="text-2xl md:text-3xl font-mono font-black italic tracking-tighter text-white">
+                        {settings?.closingTime || "02:00 AM"}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="hidden sm:flex w-16 h-16 md:w-20 md:h-20 bg-primary rounded-3xl items-center justify-center text-black relative z-10 shadow-xl group-hover:rotate-12 transition-transform shrink-0">
+                <Globe size={32} />
+              </div>
+            </div>
+
             {(settings?.branches || []).map((branch) => (
               <motion.div 
                 key={branch.id}
@@ -103,6 +138,40 @@ export function About({ settings }: AboutProps) {
             )}
           </div>
         </div>
+
+        {settings?.hotlineNumbers && settings.hotlineNumbers.length > 0 && (
+          <div className="pt-16 border-t border-white/5">
+            <h3 className="text-lg md:text-xl font-black text-primary uppercase tracking-widest mb-8">
+              {isRTL ? "خدمة العملاء والخط الساخن" : "Support & Hotline"}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {settings.hotlineNumbers.map((number, idx) => (
+                <motion.a
+                  key={idx}
+                  href={`tel:${number}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileActive={{ scale: 0.98 }}
+                  className="bg-primary/5 border border-primary/20 rounded-2xl p-6 flex items-center justify-between group overflow-hidden relative"
+                >
+                  <div className="absolute top-0 right-0 p-8 bg-primary/10 rounded-full translate-x-1/2 -translate-y-1/2 group-hover:bg-primary/20 transition-all" />
+                  <div className="relative z-10">
+                    <p className="text-[10px] font-black uppercase opacity-40 mb-1 tracking-widest">
+                      {isRTL ? "اتصل بنا الآن" : "Call Us Now"}
+                    </p>
+                    <p className="text-xl md:text-2xl font-mono font-black italic tracking-tighter text-white group-hover:text-primary transition-colors">
+                      {number}
+                    </p>
+                  </div>
+                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-black relative z-10 shadow-lg group-hover:rotate-12 transition-transform">
+                    <Phone size={24} />
+                  </div>
+                </motion.a>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="pt-16 border-t border-white/5">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">

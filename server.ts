@@ -169,6 +169,10 @@ async function startServer() {
       branchIds: [String]
     }],
     featuredItemId: String,
+    hotlineNumbers: [String],
+    openingTime: { type: String, default: "11:00 AM" },
+    closingTime: { type: String, default: "02:00 AM" },
+    isOpen24Hours: { type: Boolean, default: false },
     updatedAt: { type: Date, default: Date.now },
   });
 
@@ -530,6 +534,10 @@ app.get("/api/menu", async (req, res) => {
         defaultDeliveryFee: 0,
         areas: [],
         socialLinks: { facebook: "", instagram: "", whatsapp: "", tiktok: "" },
+        hotlineNumbers: [],
+        openingTime: "11:00 AM",
+        closingTime: "02:00 AM",
+        isOpen24Hours: false,
         branches: []
       });
     }
@@ -542,6 +550,9 @@ app.get("/api/menu", async (req, res) => {
           defaultDeliveryFee: 0,
           areas: [],
           socialLinks: { facebook: "", instagram: "", whatsapp: "", tiktok: "" },
+          hotlineNumbers: [],
+          openingTime: "11:00 AM",
+          closingTime: "02:00 AM",
           branches: []
         });
         await settings.save();

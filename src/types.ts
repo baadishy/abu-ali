@@ -93,5 +93,9 @@ export interface SiteSettings {
     whatsapp: string;
     tiktok: string;
   };
+  hotlineNumbers: string[];
+  openingTime?: string;
+  closingTime?: string;
+  isOpen24Hours?: boolean;
   branches: Branch[];
 }

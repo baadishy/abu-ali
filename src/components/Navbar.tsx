@@ -155,7 +155,9 @@ export function Navbar({ cartCount, onOpenCart, settings }: NavbarProps) {
 
           <div className="hidden sm:block text-right whitespace-nowrap">
             <p className="text-[10px] uppercase opacity-40 leading-none">{t.availableUntil}</p>
-            <p className="text-xs font-mono font-bold mt-1">02:00 AM</p>
+            <p className="text-xs font-mono font-bold mt-1">
+              {settings?.isOpen24Hours ? (isRTL ? "24 ساعة" : "24 Hours") : (settings?.closingTime || '02:00 AM')}
+            </p>
           </div>
           
           <motion.button
@@ -242,11 +244,14 @@ export function Navbar({ cartCount, onOpenCart, settings }: NavbarProps) {
             
             <div className="pt-6 border-t border-white/5 flex items-center justify-between">
               <div className="text-[10px] uppercase opacity-40 font-black tracking-widest">
-                Support
+                {isRTL ? "الدعم" : "Support"}
               </div>
-              <a href={`tel:${settings?.branches?.[0]?.phones?.[0] || '01511223344'}`} className="flex items-center gap-2 text-primary font-mono text-sm font-bold">
+              <a 
+                href={`tel:${settings?.hotlineNumbers?.[0] || settings?.branches?.[0]?.phones?.[0] || '01511223344'}`} 
+                className="flex items-center gap-2 text-primary font-mono text-sm font-bold"
+              >
                 <Phone size={14} />
-                {settings?.branches?.[0]?.phones?.[0] || '01511223344'}
+                {settings?.hotlineNumbers?.[0] || settings?.branches?.[0]?.phones?.[0] || '01511223344'}
               </a>
             </div>
           </motion.div>

@@ -29,72 +29,81 @@ export function PromotionalBanners({ offers = [] }: PromotionalBannersProps) {
 
   return (
     <section className="max-w-screen-2xl mx-auto px-4 md:px-8 pt-10 md:pt-16">
-      <div className="relative group rounded-[2rem] md:rounded-[3.5rem] overflow-hidden bg-[#1A1A1A] border border-white/5 aspect-[4/5] sm:aspect-video lg:aspect-[21/9] xl:aspect-[25/9] min-h-[400px] md:min-h-[500px] lg:min-h-[600px]">
+      <div className="relative group rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-[#1A1A1A] border border-white/5 aspect-[4/5] sm:aspect-video lg:aspect-[21/9] xl:aspect-[21/7]">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeOffers[currentIndex].id}
-            initial={{ opacity: 0, scale: 1.02 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
             className="absolute inset-0"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent z-10 hidden lg:block" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent z-10" />
             
+            <div className={cn(
+              "absolute top-6 md:top-10 z-30",
+              isRTL ? "right-6 md:right-10" : "left-6 md:left-10"
+            )}>
+              <div className={cn("flex items-center gap-3", isRTL && "flex-row-reverse")}>
+                <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/20 backdrop-blur-md rounded-xl flex items-center justify-center border border-primary/20 shrink-0">
+                  <Zap className="text-primary fill-primary" size={16} />
+                </div>
+                <div className={isRTL ? "text-right" : "text-left"}>
+                  <p className="text-primary text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] leading-none mb-1">Exclusive</p>
+                  <p className="text-white text-[10px] md:text-sm font-black uppercase tracking-[0.1em] leading-none italic">
+                    {isRTL ? "عرض خاص" : "Featured"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {activeOffers[currentIndex].image ? (
               <img 
                 src={activeOffers[currentIndex].image} 
                 alt={language === "ar" ? activeOffers[currentIndex].titleAr : activeOffers[currentIndex].title}
-                className="w-full h-full object-cover object-center transition-transform duration-[10s] ease-linear scale-105 group-hover:scale-100"
+                className="w-full h-full object-cover object-center"
               />
             ) : null}
             
             <div className={cn(
-              "absolute inset-0 z-20 p-6 sm:p-10 md:p-16 lg:p-20 flex flex-col justify-end lg:justify-center overflow-hidden",
-              isRTL ? "right-0 text-right items-end" : "left-0 text-left items-start"
+              "absolute inset-0 z-20 p-6 sm:p-10 md:p-12 lg:p-16 flex flex-col justify-end items-center text-center",
             )}>
-              <div className="max-w-full lg:max-w-4xl">
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className={cn("flex items-center gap-3 mb-4 md:mb-6", isRTL && "flex-row-reverse")}
-                >
-                  <div className="w-10 h-10 md:w-14 md:h-14 bg-primary rounded-xl md:rounded-2xl flex items-center justify-center glow-orange shrink-0">
-                    <Zap className="text-black fill-black" size={20} />
-                  </div>
-                  <span className="text-primary font-black whitespace-nowrap uppercase tracking-[0.4em] text-[10px] md:text-sm">Featured Offer</span>
-                </motion.div>
+              <div className="max-w-4xl space-y-4 md:space-y-6">
+                {/* Only show title/description if they exist to avoid empty boxes overlapping image text */}
+                {(language === "ar" ? activeOffers[currentIndex].titleAr : activeOffers[currentIndex].title) && (
+                  <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black italic uppercase tracking-tighter text-white break-words"
+                  >
+                    {language === "ar" ? activeOffers[currentIndex].titleAr : activeOffers[currentIndex].title}
+                  </motion.h2>
+                )}
                 
-                <motion.h2
+                {(language === "ar" ? activeOffers[currentIndex].descriptionAr : activeOffers[currentIndex].description) && (
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-white/80 text-xs sm:text-sm md:text-lg lg:text-xl font-medium max-w-2xl mx-auto line-clamp-2 sm:line-clamp-none"
+                  >
+                    {language === "ar" ? activeOffers[currentIndex].descriptionAr : activeOffers[currentIndex].description}
+                  </motion.p>
+                )}
+                
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="text-2xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-display font-black italic uppercase tracking-tighter mb-4 md:mb-6 leading-[0.9] text-white break-words"
-                >
-                  {language === "ar" ? activeOffers[currentIndex].titleAr : activeOffers[currentIndex].title}
-                </motion.h2>
-                
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  className="text-white/70 text-xs sm:text-sm md:text-lg lg:text-xl xl:text-2xl font-medium leading-relaxed mb-6 md:mb-8 max-w-xl md:max-w-2xl xl:max-w-4xl line-clamp-3 md:line-clamp-none whitespace-normal"
-                >
-                  {language === "ar" ? activeOffers[currentIndex].descriptionAr : activeOffers[currentIndex].description}
-                </motion.p>
-                
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 }}
+                  className="pt-2"
                 >
                   <button 
                     onClick={() => document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="bg-white text-black px-6 sm:px-10 py-3 sm:py-4 md:py-5 rounded-xl sm:rounded-2xl font-black uppercase tracking-widest text-[10px] md:text-sm hover:bg-primary transition-all hover:scale-105 active:scale-95 shadow-2xl shadow-black/50"
+                    className="bg-white text-black px-8 md:px-12 py-3 md:py-4 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-xs md:text-sm hover:bg-primary transition-all hover:scale-105 active:scale-95 shadow-xl"
                   >
-                    {isRTL ? "اطلب الآن" : "Order This Now"}
+                    {isRTL ? "اطلب الآن" : "Order Now"}
                   </button>
                 </motion.div>
               </div>

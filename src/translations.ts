@@ -152,7 +152,10 @@ export const translations = {
     branchDefaultFee: "Branch Default Delivery Fee",
     areaNameEn: "Area Name (EN)",
     areaNameAr: "Area Name (AR)",
-    areaFee: "Delivery Fee for this Area"
+    areaFee: "Delivery Fee for this Area",
+    openingTime: "Opening Time",
+    closingTime: "Closing Time",
+    open24Hours: "Open 24 Hours"
   },
   ar: {
     brandName: "أبو علي فرايد تشيكن",
@@ -305,6 +308,9 @@ export const translations = {
     branchDefaultFee: "سعر التوصيل الافتراضي للفرع",
     areaNameEn: "اسم المنطقة (EN)",
     areaNameAr: "اسم المنطقة (AR)",
-    areaFee: "سعر التوصيل لهذه المنطقة"
+    areaFee: "سعر التوصيل لهذه المنطقة",
+    openingTime: "وقت الفتح",
+    closingTime: "وقت الإغلاق",
+    open24Hours: "مفتوح 24 ساعة"
   }
 };
