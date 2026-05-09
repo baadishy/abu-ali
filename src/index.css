@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Alexandria:wght@400;700;900&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-arabic: "Alexandria", sans-serif;
+  
+  --color-primary: #FF6B00;
+  --color-primary-foreground: #000000;
+  --color-secondary: #1A1A1A;
+  --color-accent: #25D366;
+  --color-background: #0A0A0A;
+  --color-card: #141414;
+
+  --breakpoint-3xl: 120rem; /* 1920px */
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans bg-background text-white antialiased overflow-x-hidden;
+  }
+  
+  html {
+    @apply overflow-x-hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-black uppercase tracking-tighter;
+  }
+}
+
+.glow-orange {
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
