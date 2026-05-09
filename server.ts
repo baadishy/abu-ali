@@ -11,7 +11,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-import { getDeliveryFee } from "./deliveryService.js";
+import { getDeliveryFee } from "./deliveryService";
 
 dotenv.config();
 
