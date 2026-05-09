@@ -11,7 +11,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-import { getDeliveryFee } from "./deliveryService.ts";
+import { getDeliveryFee } from "./deliveryService.js";
 
 dotenv.config();
 
@@ -381,6 +381,20 @@ async function startServer() {
     } catch (err) {
       res.status(400).json({ error: "Failed to update settings" });
     }
+  });
+
+  // Basic 404 handler for API
+  app.use("/api/*", (req, res) => {
+    res.status(404).json({ error: "API Route not found" });
+  });
+
+  // Global Error Handler
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("Global Error Handler:", err);
+    res.status(err.status || 500).json({
+      error: "Internal Server Error",
+      message: process.env.NODE_ENV === "production" ? "An unexpected error occurred" : err.message
+    });
   });
 
   // Database Connection
