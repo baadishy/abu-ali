@@ -19,7 +19,6 @@ The application is built as a full-stack JavaScript application using the follow
 
 ```text
 ├── server.ts            # Main application entry point (Express + Vite + DB)
-├── deliveryService.ts   # Logic for calculating complex delivery fees
 ├── vercel.json          # Vercel deployment configuration
 ├── .env.example         # Template for environment variables
 ├── src/
