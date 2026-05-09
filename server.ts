@@ -11,7 +11,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
-import { getDeliveryFee } from "./deliveryService";
+import { getDeliveryFee } from "./deliveryService.js";
 
 dotenv.config();
 
@@ -35,30 +35,32 @@ const upload = multer({ storage: storage });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function startServer() {
+export async function createApp() {
   const app = express();
-  const PORT = process.env.PORT || 3000;
-
   // MongoDB Connection
   const MONGODB_URI = process.env.MONGODB_URI;
   if (!MONGODB_URI && process.env.NODE_ENV === "production") {
-    console.error("FATAL: MONGODB_URI is not defined in production environment.");
-    process.exit(1);
+    console.warn("MONGODB_URI is not defined; API will run in degraded mode.");
   }
-  const dbUri = MONGODB_URI || "mongodb://localhost:27017/burger-station";
+  const dbUri = MONGODB_URI || (process.env.NODE_ENV === "production" ? undefined : "mongodb://localhost:27017/burger-station");
   
   mongoose.set('bufferCommands', false);
   let isDbConnected = false;
 
   const connectWithRetry = async () => {
+    if (!dbUri) {
+      console.warn("Skipping MongoDB connection because no MONGODB_URI is configured.");
+      return;
+    }
+
     console.log("Connecting to MongoDB...");
     try {
-      await mongoose.connect(dbUri, { serverSelectionTimeoutMS: 10000 });
+      await mongoose.connect(dbUri, { serverSelectionTimeoutMS: 5000 });
       console.log("Successfully connected to MongoDB");
       isDbConnected = true;
     } catch (err) {
       console.error("MongoDB connection failed:", err);
-      if (process.env.NODE_ENV === "production") {
+      if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
         console.warn("Retrying connection in 5 seconds...");
         setTimeout(connectWithRetry, 5000);
       } else {
@@ -410,9 +412,26 @@ async function startServer() {
     app.get("*", (req, res) => res.sendFile(path.join(distPath, "index.html")));
   }
 
-  app.listen(Number(PORT), "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+  return app;
 }
 
-startServer().catch(console.error);
+const appPromise = createApp();
+
+export default async function handler(req: express.Request, res: express.Response) {
+  const app = await appPromise;
+  return app(req, res);
+}
+
+if (process.argv[1] === __filename) {
+  const PORT = process.env.PORT || 3000;
+  appPromise
+    .then((app) => {
+      app.listen(Number(PORT), "0.0.0.0", () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}
