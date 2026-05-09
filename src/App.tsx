@@ -4,7 +4,6 @@ import { Hero } from "./components/Hero";
 import { MenuCard } from "./components/MenuCard";
 import { Cart } from "./components/Cart";
 import { CategoryFilter } from "./components/CategoryFilter";
-import { About } from "./components/About";
 import { PromotionalBanners } from "./components/PromotionalBanners";
 import { ItemDetailModal } from "./components/ItemDetailModal";
 import { MenuItem, CartItem, Category, SiteSettings } from "./types";
@@ -13,12 +12,41 @@ import { motion, AnimatePresence } from "motion/react";
 
 const Admin = React.lazy(() => import("./components/Admin").then(m => ({ default: m.Admin })));
 const Profile = React.lazy(() => import("./components/Profile").then(m => ({ default: m.Profile })));
+const About = React.lazy(() => import("./components/About").then(m => ({ default: m.About })));
 
 import { cn } from "./lib/utils";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import { NotificationProvider, useNotification } from "./NotificationContext";
 
 const CATEGORIES: Category[] = ["Burger", "Meals", "Fries", "Drinks"];
+
+const PageLoader = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+    <motion.div 
+      animate={{ 
+        scale: [1, 1.2, 1],
+        rotate: [0, 180, 360],
+        opacity: [0.5, 1, 0.5]
+      }} 
+      transition={{ 
+        repeat: Infinity, 
+        duration: 2,
+        ease: "easeInOut"
+      }} 
+      className="w-16 h-16 bg-primary rounded-3xl shadow-2xl shadow-primary/20 flex items-center justify-center"
+    >
+      <div className="w-8 h-8 border-4 border-black/20 border-t-black rounded-full animate-spin" />
+    </motion.div>
+    <motion.p 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      className="mt-8 text-primary font-black uppercase italic tracking-widest text-xs"
+    >
+      Loading Burger Station...
+    </motion.p>
+  </div>
+);
 
 function AppContent() {
   const { t, language, isRTL } = useLanguage();
@@ -114,7 +142,7 @@ function AppContent() {
     return (
       <div className={cn("min-h-screen bg-background text-white selection:bg-primary selection:text-black pt-4", isRTL && "font-arabic")}>
         <Navbar cartCount={0} onOpenCart={() => {}} settings={settings} />
-        <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-black"><motion.div animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-12 h-12 bg-primary rounded-full shadow-lg shadow-primary/20" /></div>}>
+        <React.Suspense fallback={<PageLoader />}>
           <Admin />
         </React.Suspense>
       </div>
@@ -125,7 +153,7 @@ function AppContent() {
     return (
       <div className={cn("min-h-screen bg-background text-white selection:bg-primary selection:text-black pt-4", isRTL && "font-arabic")}>
         <Navbar cartCount={0} onOpenCart={() => {}} settings={settings} />
-        <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-black"><motion.div animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-12 h-12 bg-primary rounded-full shadow-lg shadow-primary/20" /></div>}>
+        <React.Suspense fallback={<PageLoader />}>
           <Profile />
         </React.Suspense>
       </div>
@@ -362,7 +390,9 @@ function AppContent() {
           ) : null}
         </section>
 
-        <About settings={settings} />
+        <React.Suspense fallback={<div className="py-20 text-center text-white/20 uppercase font-black italic">Loading About...</div>}>
+          <About settings={settings} />
+        </React.Suspense>
       </main>
 
       <footer className="bg-black/50 border-t border-white/5 py-8 md:py-16">

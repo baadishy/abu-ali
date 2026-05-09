@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://burger-station.vercel.app/sitemap.xml
