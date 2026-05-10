@@ -1,6 +1,5 @@
 // @ts-nocheck
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
@@ -650,19 +649,20 @@ async function createApp() {
 
   if (isDbConnected) await seedData();
 
-  // In local dev, Vite serves the SPA; in production, static hosting is handled
-  // by `dist/` (local) or Vercel's static output directory (deployment).
-  if (process.env.NODE_ENV !== "production") {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else if (!process.env.VERCEL) {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => res.sendFile(path.join(distPath, "index.html")));
-  }
+   // In local dev, Vite serves the SPA; in production, static hosting is handled
+   // by `dist/` (local) or Vercel's static output directory (deployment).
+   if (process.env.NODE_ENV !== "production") {
+     const { createServer: createViteServer } = await import("vite");
+     const vite = await createViteServer({
+       server: { middlewareMode: true },
+       appType: "spa",
+     });
+     app.use(vite.middlewares);
+   } else if (!process.env.VERCEL) {
+     const distPath = path.join(process.cwd(), "dist");
+     app.use(express.static(distPath));
+     app.get("*", (req, res) => res.sendFile(path.join(distPath, "index.html")));
+   }
 
     return app;
   })();
