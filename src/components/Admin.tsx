@@ -184,6 +184,23 @@ export function Admin() {
     return () => clearTimeout(timer);
   }, [offerFormData.description, offerFormData.descriptionAr]);
 
+  // Auto-translation logic for Categories
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      if (categoryFormData.name && !categoryFormData.nameAr) translateCategoryField(true);
+      if (!categoryFormData.name && categoryFormData.nameAr) translateCategoryField(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [categoryFormData.name, categoryFormData.nameAr]);
+
+  // Dynamic order for new category
+  React.useEffect(() => {
+    if (!editingCategoryId && categoryFormData.order === 0 && categories.length > 0) {
+      const maxOrder = Math.max(...categories.map(c => c.order || 0));
+      setCategoryFormData(prev => ({ ...prev, order: maxOrder + 1 }));
+    }
+  }, [categories, editingCategoryId, categoryFormData.order]);
+
   const handleSubmitCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -347,6 +364,16 @@ export function Admin() {
         if (toArabic) setOfferFormData(prev => ({ ...prev, descriptionAr: translated }));
         else setOfferFormData(prev => ({ ...prev, description: translated }));
       }
+    }
+  };
+
+  const translateCategoryField = async (toArabic: boolean) => {
+    const text = toArabic ? categoryFormData.name : categoryFormData.nameAr;
+    if (!text) return;
+    const translated = await translateText(text, toArabic ? 'en' : 'ar', toArabic ? 'ar' : 'en');
+    if (translated) {
+      if (toArabic) setCategoryFormData(prev => ({ ...prev, nameAr: translated }));
+      else setCategoryFormData(prev => ({ ...prev, name: translated }));
     }
   };
 
@@ -1505,7 +1532,17 @@ export function Admin() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.categoryNameAr}</label>
+                      <div className="flex justify-between items-center px-2">
+                        <label className="text-[8px] uppercase font-black opacity-30">{t.categoryNameAr}</label>
+                        <button 
+                          type="button" 
+                          onClick={() => translateCategoryField(true)}
+                          className="text-primary hover:text-white transition-colors"
+                          title="Translate to Arabic"
+                        >
+                          <Languages size={10} />
+                        </button>
+                      </div>
                       <input 
                         placeholder={t.categoryNameAr}
                         className="w-full bg-white/5 p-4 rounded-xl text-sm text-right focus:border-primary outline-none transition-all"
