@@ -463,7 +463,7 @@ export function Cart({ isOpen, onClose, items, onUpdateQuantity, onRemove, onSub
                             {isRTL ? "تم تفعيل العرض!" : "Sale Activated!"}
                           </p>
                           <p className="text-sm font-bold text-white/90 leading-tight">
-                            {isRTL ? "لقد وفرت مبللاً جيداً!" : "You've saved big on this order!"}
+                            {isRTL ? "لقد وفرت مبلغا جيداً!" : "You've saved big on this order!"}
                           </p>
                         </div>
                       </motion.div>
