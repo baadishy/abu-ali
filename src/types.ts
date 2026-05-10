@@ -33,11 +33,22 @@ export interface Order {
   subtotal: number;
   deliveryFee: number;
   total: number;
-  selectedArea: string;
+  selectedArea: string; // This used to store the label, will keep for backward compatibility or change its use
+  branchId?: string;
+  branchName?: string;
+  branchNameAr?: string;
+  areaId?: string;
+  areaName?: string;
+  areaNameAr?: string;
   customerName: string;
   phone: string;
   address: string;
-  status: "Pending" | "Preparing" | "Out for Delivery" | "Completed" | "Cancelled";
+  status:
+    | "Pending"
+    | "Preparing"
+    | "Out for Delivery"
+    | "Completed"
+    | "Cancelled";
   cancelReason?: string;
   notes?: string;
   createdAt?: string;
@@ -59,7 +70,7 @@ export interface PromotionalOffer {
   image: string;
   imagePublicId?: string;
   isActive: boolean;
-  type: 'buy_x_get_y' | 'fixed_discount' | 'percentage_discount' | 'manual';
+  type: "buy_x_get_y" | "fixed_discount" | "percentage_discount" | "manual";
   buyQuantity?: number;
   getQuantity?: number;
   categoryLimit?: Category;

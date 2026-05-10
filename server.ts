@@ -6,9 +6,9 @@ import helmet from "helmet";
 import compression from "compression";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import { v2 as cloudinary } from 'cloudinary';
-import multer from 'multer';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import { v2 as cloudinary } from "cloudinary";
+import multer from "multer";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 import { getDeliveryFee } from "./deliveryService.js";
 
@@ -18,14 +18,14 @@ dotenv.config();
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'burger-station',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    folder: "burger-station",
+    allowed_formats: ["jpg", "png", "jpeg", "webp"],
   } as any,
 });
 
@@ -36,25 +36,32 @@ const __dirname = path.dirname(__filename);
 
 export async function createApp() {
   const app = express();
+
   // MongoDB Connection
   const MONGODB_URI = process.env.MONGODB_URI;
   if (!MONGODB_URI && process.env.NODE_ENV === "production") {
     console.warn("MONGODB_URI is not defined; API will run in degraded mode.");
   }
-  const dbUri = MONGODB_URI || (process.env.NODE_ENV === "production" ? undefined : "mongodb://localhost:27017/burger-station");
-  
-  mongoose.set('bufferCommands', false);
+  const dbUri =
+    MONGODB_URI ||
+    (process.env.NODE_ENV === "production"
+      ? undefined
+      : "mongodb://localhost:27017/burger-station");
+
+  mongoose.set("bufferCommands", false);
   let isDbConnected = false;
 
   const connectWithRetry = async () => {
     if (!dbUri) {
-      console.warn("Skipping MongoDB connection because no MONGODB_URI is configured.");
+      console.warn(
+        "Skipping MongoDB connection because no MONGODB_URI is configured.",
+      );
       return;
     }
 
     console.log("Connecting to MongoDB...");
     try {
-      await mongoose.connect(dbUri, { serverSelectionTimeoutMS: 5000 });
+      await mongoose.connect(dbUri, { serverSelectionTimeoutMS: 10000 });
       console.log("Successfully connected to MongoDB");
       isDbConnected = true;
     } catch (err) {
@@ -69,19 +76,23 @@ export async function createApp() {
   };
 
   app.use(cors());
-  app.use(helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.use(compression());
   app.use(express.json());
 
   // API Health check
   app.get("/api/health", (req, res) => {
-    res.json({ 
-      status: isDbConnected ? "ok" : "degraded", 
-      message: isDbConnected ? "Burger Station API is running" : "Burger Station API is running (Database disconnected)",
-      timestamp: new Date().toISOString()
+    res.json({
+      status: isDbConnected ? "ok" : "degraded",
+      message: isDbConnected
+        ? "Burger Station API is running"
+        : "Burger Station API is running (Database disconnected)",
+      timestamp: new Date().toISOString(),
     });
   });
 
@@ -91,13 +102,17 @@ export async function createApp() {
     nameAr: { type: String },
     price: { type: Number, required: true },
     discountPrice: { type: Number },
-    category: { type: String, required: true, enum: ["Burger", "Meals", "Fries", "Drinks"] },
+    category: {
+      type: String,
+      required: true,
+      enum: ["Burger", "Meals", "Fries", "Drinks"],
+    },
     image: { type: String },
     imagePublicId: { type: String },
     description: { type: String },
     descriptionAr: { type: String },
     isAvailable: { type: Boolean, default: true },
-    variants: [{ id: String, name: String, nameAr: String, price: Number }]
+    variants: [{ id: String, name: String, nameAr: String, price: Number }],
   });
 
   const MenuItem = mongoose.model("MenuItem", menuItemSchema);
@@ -110,6 +125,12 @@ export async function createApp() {
     deliveryFee: { type: Number, default: 0 },
     total: Number,
     selectedArea: String,
+    branchId: String,
+    branchName: String,
+    branchNameAr: String,
+    areaId: String,
+    areaName: String,
+    areaNameAr: String,
     customerName: String,
     phone: String,
     address: String,
@@ -122,41 +143,68 @@ export async function createApp() {
   const Order = mongoose.model("Order", orderSchema);
 
   // Schema for Website Settings
-  const branchSchema = new mongoose.Schema({
-    id: String,
-    name: String,
-    nameAr: String,
-    address: String,
-    addressAr: String,
-    phones: [String],
-    mapUrl: String,
-    deliveryFee: { type: Number, default: 0 },
-    areas: [{ id: String, name: String, nameAr: String, fee: { type: Number, default: 0 }, _id: false }]
-  }, { _id: false });
+  const branchSchema = new mongoose.Schema(
+    {
+      id: String,
+      name: String,
+      nameAr: String,
+      address: String,
+      addressAr: String,
+      phones: [String],
+      mapUrl: String,
+      deliveryFee: { type: Number, default: 0 },
+      areas: [
+        {
+          id: String,
+          name: String,
+          nameAr: String,
+          fee: { type: Number, default: 0 },
+          _id: false,
+        },
+      ],
+    },
+    { _id: false },
+  );
 
   const settingsSchema = new mongoose.Schema({
     storeName: { type: String, default: "Abu Ali Fried Chicken" },
     storeNameAr: { type: String, default: "أبو علي فرايد تشيكن" },
     defaultDeliveryFee: { type: Number, default: 0 },
     freeDeliveryThreshold: { type: Number, default: 0 },
-    socialLinks: { facebook: String, instagram: String, whatsapp: String, tiktok: String },
+    socialLinks: {
+      facebook: String,
+      instagram: String,
+      whatsapp: String,
+      tiktok: String,
+    },
     branches: [branchSchema],
-    offers: [{
-      id: String,
-      title: String,
-      titleAr: String,
-      description: String,
-      descriptionAr: String,
-      image: String,
-      imagePublicId: String,
-      isActive: { type: Boolean, default: true },
-      type: { type: String, enum: ['buy_x_get_y', 'fixed_discount', 'percentage_discount', 'manual'], default: 'manual' },
-      buyQuantity: Number,
-      getQuantity: Number,
-      categoryLimit: String,
-      discountValue: Number,
-      branchIds: [String]
-    }],
+    offers: [
+      {
+        id: String,
+        title: String,
+        titleAr: String,
+        description: String,
+        descriptionAr: String,
+        image: String,
+        imagePublicId: String,
+        isActive: { type: Boolean, default: true },
+        type: {
+          type: String,
+          enum: [
+            "buy_x_get_y",
+            "fixed_discount",
+            "percentage_discount",
+            "manual",
+          ],
+          default: "manual",
+        },
+        buyQuantity: Number,
+        getQuantity: Number,
+        categoryLimit: String,
+        discountValue: Number,
+        branchIds: [String],
+      },
+    ],
     featuredItemId: String,
     hotlineNumbers: [String],
     openingTime: { type: String, default: "11:00 AM" },
@@ -193,19 +241,24 @@ export async function createApp() {
             nameAr: "وجبة الدجاج المقلي الأصلية",
             price: 150,
             category: "Meals",
-            image: "https://images.unsplash.com/photo-1626645738196-c2a7c8d08f58?auto=format&fit=crop&q=80&w=800",
-            description: "4 pieces of our signature original recipe fried chicken, served with fries, coleslaw, and bread.",
-            descriptionAr: "٤ قطع من الدجاج المقلي بخلطتنا الأصلية، تقدم مع البطاطس، كول سلو، وخبز."
+            image:
+              "https://images.unsplash.com/photo-1626645738196-c2a7c8d08f58?auto=format&fit=crop&q=80&w=800",
+            description:
+              "4 pieces of our signature original recipe fried chicken, served with fries, coleslaw, and bread.",
+            descriptionAr:
+              "٤ قطع من الدجاج المقلي بخلطتنا الأصلية، تقدم مع البطاطس، كول سلو، وخبز.",
           },
           {
             name: "Spicy Zinger Burger",
             nameAr: "زنجر برجر حار",
             price: 95,
             category: "Burger",
-            image: "https://images.unsplash.com/photo-1610614819513-58e3524cc44a?auto=format&fit=crop&q=80&w=800",
-            description: "Crispy spicy chicken breast, lettuce, tomato, and spicy mayo.",
-            descriptionAr: "صدر دجاج مقرمش حار، خس، طماطم، ومايونيز حار."
-          }
+            image:
+              "https://images.unsplash.com/photo-1610614819513-58e3524cc44a?auto=format&fit=crop&q=80&w=800",
+            description:
+              "Crispy spicy chicken breast, lettuce, tomato, and spicy mayo.",
+            descriptionAr: "صدر دجاج مقرمش حار، خس، طماطم، ومايونيز حار.",
+          },
         ];
         await MenuItem.insertMany(initialItems);
       }
@@ -221,11 +274,14 @@ export async function createApp() {
       nameAr: "كلاسيك سماش برجر",
       price: 120,
       category: "Burger",
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800",
-      description: "Double smashed beef patties, cheddar cheese, pickles, and our signature sauce.",
-      descriptionAr: "قطعتين لحم مفروم، جبنة شيدر، خيار مخلل، وصوص ستايشن المميز.",
-      isAvailable: true
-    }
+      image:
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800",
+      description:
+        "Double smashed beef patties, cheddar cheese, pickles, and our signature sauce.",
+      descriptionAr:
+        "قطعتين لحم مفروم، جبنة شيدر، خيار مخلل، وصوص ستايشن المميز.",
+      isAvailable: true,
+    },
   ];
 
   // API Endpoints
@@ -250,13 +306,21 @@ export async function createApp() {
   });
 
   app.post("/api/customer", async (req, res) => {
-    if (!isDbConnected) return res.status(500).json({ error: "Database disconnected" });
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
     try {
       const { phone, name, address, notes, branchId, areaId } = req.body;
       const customer = await Customer.findOneAndUpdate(
         { phone },
-        { name, address, notes, favoriteBranchId: branchId, favoriteAreaId: areaId, updatedAt: new Date() },
-        { upsert: true, new: true }
+        {
+          name,
+          address,
+          notes,
+          favoriteBranchId: branchId,
+          favoriteAreaId: areaId,
+          updatedAt: new Date(),
+        },
+        { upsert: true, new: true },
       );
       res.json(customer);
     } catch (err) {
@@ -277,7 +341,9 @@ export async function createApp() {
   app.get("/api/orders/:phone", async (req, res) => {
     if (!isDbConnected) return res.json([]);
     try {
-      const orders = await Order.find({ phone: req.params.phone }).sort({ createdAt: -1 });
+      const orders = await Order.find({ phone: req.params.phone }).sort({
+        createdAt: -1,
+      });
       res.json(orders);
     } catch (err) {
       res.status(500).json({ error: "Failed to fetch orders" });
@@ -285,7 +351,8 @@ export async function createApp() {
   });
 
   app.post("/api/orders", async (req, res) => {
-    if (!isDbConnected) return res.status(500).json({ error: "Database disconnected" });
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
     try {
       const order = new Order(req.body);
       await order.save();
@@ -306,29 +373,46 @@ export async function createApp() {
     }
   });
 
-  app.put("/api/admin/orders/:id", async (req, res) => {
-    if (!isDbConnected) return res.status(500).json({ error: "Database disconnected" });
-    try {
-      const order = await Order.findByIdAndUpdate(req.params.id, req.body, { new: true });
-      res.json(order);
-    } catch (err) {
-      res.status(400).json({ error: "Failed to update order" });
-    }
-  });
-
   app.get("/api/admin/orders", async (req, res) => {
     if (!isDbConnected) return res.json([]);
     try {
       const orders = await Order.find().sort({ createdAt: -1 });
       res.json(orders);
     } catch (err) {
-      res.status(500).json({ error: "Failed to fetch admin orders" });
+      res.status(500).json({ error: "Failed to fetch orders" });
+    }
+  });
+
+  app.put("/api/admin/orders/:id", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      const order = await Order.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+      });
+      res.json(order);
+    } catch (err) {
+      res.status(400).json({ error: "Failed to update order" });
+    }
+  });
+
+  app.delete("/api/admin/orders/:id", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      await Order.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(400).json({ error: "Failed to delete order" });
     }
   });
 
   app.post("/api/admin/login", (req, res) => {
     const { adminId, password } = req.body;
-    if (adminId === (process.env.ADMIN_ID || "admin66") && password === (process.env.ADMIN_PASSWORD || "admin123")) {
+    if (
+      adminId === (process.env.ADMIN_ID || "admin66") &&
+      password === (process.env.ADMIN_PASSWORD || "admin123")
+    ) {
       res.json({ token: "admin-session-token" });
     } else {
       res.status(401).json({ error: "Invalid credentials" });
@@ -345,6 +429,42 @@ export async function createApp() {
     }
   });
 
+  app.post("/api/admin/menu", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      const item = new MenuItem(req.body);
+      await item.save();
+      res.json(item);
+    } catch (err) {
+      res.status(400).json({ error: "Failed to create menu item" });
+    }
+  });
+
+  app.put("/api/admin/menu/:id", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      const item = await MenuItem.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+      });
+      res.json(item);
+    } catch (err) {
+      res.status(400).json({ error: "Failed to update menu item" });
+    }
+  });
+
+  app.delete("/api/admin/menu/:id", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      await MenuItem.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(400).json({ error: "Failed to delete menu item" });
+    }
+  });
+
   app.get("/api/admin/customers", async (req, res) => {
     if (!isDbConnected) return res.json([]);
     try {
@@ -355,13 +475,27 @@ export async function createApp() {
     }
   });
 
-  app.post("/api/admin/upload", upload.single('image'), (req: any, res) => {
+  app.post("/api/admin/upload", upload.single("image"), (req: any, res) => {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
     res.json({ url: req.file.path, public_id: req.file.filename });
   });
 
+  app.post("/api/admin/remove-image", async (req, res) => {
+    try {
+      const { public_id } = req.body;
+      if (!public_id)
+        return res.status(400).json({ error: "No public_id provided" });
+      await cloudinary.uploader.destroy(public_id);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Cloudinary Error:", err);
+      res.status(500).json({ error: "Failed to remove image" });
+    }
+  });
+
   app.get("/api/settings", async (req, res) => {
-    if (!isDbConnected) return res.json({ storeName: "Abu Ali Fried Chicken", branches: [] });
+    if (!isDbConnected)
+      return res.json({ storeName: "Abu Ali Fried Chicken", branches: [] });
     try {
       let settings = await Settings.findOne();
       if (!settings) {
@@ -375,19 +509,27 @@ export async function createApp() {
   });
 
   app.put("/api/settings", async (req, res) => {
-    if (!isDbConnected) return res.status(500).json({ error: "Database disconnected" });
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
     try {
-      const settings = await Settings.findOneAndUpdate({}, req.body, { upsert: true, new: true });
+      const settings = await Settings.findOneAndUpdate({}, req.body, {
+        upsert: true,
+        new: true,
+      });
       res.json(settings);
     } catch (err) {
       res.status(400).json({ error: "Failed to update settings" });
     }
   });
-  
+
   app.post("/api/admin/settings", async (req, res) => {
-    if (!isDbConnected) return res.status(500).json({ error: "Database disconnected" });
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
     try {
-      const settings = await Settings.findOneAndUpdate({}, req.body, { upsert: true, new: true });
+      const settings = await Settings.findOneAndUpdate({}, req.body, {
+        upsert: true,
+        new: true,
+      });
       res.json(settings);
     } catch (err) {
       res.status(400).json({ error: "Failed to update settings" });
@@ -400,13 +542,23 @@ export async function createApp() {
   });
 
   // Global Error Handler
-  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error("Global Error Handler:", err);
-    res.status(err.status || 500).json({
-      error: "Internal Server Error",
-      message: process.env.NODE_ENV === "production" ? "An unexpected error occurred" : err.message
-    });
-  });
+  app.use(
+    (
+      err: any,
+      req: express.Request,
+      res: express.Response,
+      next: express.NextFunction,
+    ) => {
+      console.error("Global Error Handler:", err);
+      res.status(err.status || 500).json({
+        error: "Internal Server Error",
+        message:
+          process.env.NODE_ENV === "production"
+            ? "An unexpected error occurred"
+            : err.message,
+      });
+    },
+  );
 
   // Database Connection
   await connectWithRetry();
@@ -414,7 +566,10 @@ export async function createApp() {
 
   if (process.env.NODE_ENV !== "production") {
     const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
     app.use(vite.middlewares);
   } else {
     const distPath = path.join(process.cwd(), "dist");
@@ -433,7 +588,7 @@ export default async function handler(req: express.Request, res: express.Respons
 }
 
 if (process.argv[1] === __filename) {
-  const PORT = process.env.PORT || 5000;
+  const PORT = process.env.PORT || 3000;
   appPromise
     .then((app) => {
       app.listen(Number(PORT), "0.0.0.0", () => {
