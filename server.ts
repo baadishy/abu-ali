@@ -423,7 +423,7 @@ export default async function handler(req: express.Request, res: express.Respons
 }
 
 if (process.argv[1] === __filename) {
-  const PORT = process.env.PORT || 3000;
+  const PORT = process.env.PORT || 5000;
   appPromise
     .then((app) => {
       app.listen(Number(PORT), "0.0.0.0", () => {

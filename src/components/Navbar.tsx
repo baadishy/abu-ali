@@ -98,8 +98,13 @@ export function Navbar({ cartCount, onOpenCart, settings }: NavbarProps) {
           </button>
           
           <div className="flex items-center gap-2 md:gap-4 cursor-pointer min-w-0" onClick={() => navigateTo('/')}>
-            <div className="w-10 h-10 md:w-16 md:h-16 bg-primary rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 group">
-              <span className="text-black text-xl md:text-3xl font-black italic tracking-tighter transform group-hover:scale-110 transition-transform">A</span>
+            <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl overflow-hidden shrink-0 shadow-lg shadow-primary/20 bg-black/10">
+              <img
+                src="/abu-ali-logo.png"
+                alt={(settings?.storeNameAr || settings?.storeName || "Logo") + " logo"}
+                className="w-full h-full object-cover"
+                loading="eager"
+              />
             </div>
             <div className="min-w-0 flex flex-col justify-center">
               <h1 className="text-sm md:text-xl font-black tracking-tight uppercase leading-tight text-white truncate max-w-[120px] md:max-w-none">
