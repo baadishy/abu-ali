@@ -1,7 +1,9 @@
 import type { Request, Response } from "express";
-import handler from "../server.ts";
+// This file is generated during `npm run build` by `tsconfig.server.json`.
+// Vercel will run the build before executing the function.
+// @ts-expect-error generated at build time
+import handler from "../dist-server/server.js";
 
 export default function vercelApi(req: Request, res: Response) {
   return handler(req, res);
 }
-

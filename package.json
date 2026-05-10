@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "build": "vite build && tsc -p tsconfig.json --noEmit",
+    "build": "vite build && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json",
     "start": "NODE_ENV=production tsx server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
