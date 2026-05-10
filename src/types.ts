@@ -37,6 +37,7 @@ export interface Order {
   _id: string;
   items: { name: string; price: number; quantity: number }[];
   subtotal: number;
+  discount?: number;
   deliveryFee: number;
   total: number;
   selectedArea: string; // This used to store the label, will keep for backward compatibility or change its use

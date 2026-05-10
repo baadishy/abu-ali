@@ -6,7 +6,11 @@ import { cn } from "../lib/utils";
 interface Order {
   _id: string;
   items: { name: string; price: number; quantity: number }[];
+  subtotal: number;
+  discount: number;
+  deliveryFee: number;
   total: number;
+  appliedOffers?: { title: string; titleAr: string; discountAmount: number }[];
   status: string;
   createdAt: string;
   branchName?: string;
@@ -14,6 +18,9 @@ interface Order {
   areaName?: string;
   areaNameAr?: string;
   selectedArea?: string;
+  address: string;
+  notes?: string;
+  cancelReason?: string;
 }
 
 export function Profile() {
@@ -190,34 +197,78 @@ export function Profile() {
                   </div>
 
                   <div className="flex flex-wrap gap-3 mb-6 text-[10px] font-bold uppercase tracking-wider text-white/50">
-                    <div className={cn("flex items-center gap-1.5", isRTL && "flex-row-reverse")}>
-                      <MapPin size={12} className="text-primary" />
-                      <span>
-                        {language === 'ar' ? (order.branchNameAr || order.branchName) : order.branchName || t.locationName}
-                      </span>
+                    <div className={cn("flex flex-col gap-1", isRTL && "items-end")}>
+                      <span className="text-[8px] opacity-40">{t.branch || "Branch"}</span>
+                      <div className={cn("flex items-center gap-1.5", isRTL && "flex-row-reverse")}>
+                        <MapPin size={12} className="text-primary" />
+                        <span className="text-white">
+                          {language === 'ar' ? (order.branchNameAr || order.branchName) : order.branchName || t.locationName}
+                        </span>
+                      </div>
                     </div>
-                    <div className={cn("flex items-center gap-1.5", isRTL && "flex-row-reverse")}>
-                      <div className="w-1 h-1 bg-white/20 rounded-full" />
-                      <span>
-                        {language === 'ar' ? (order.areaNameAr || order.areaName) : order.areaName || order.selectedArea || t.deliveryArea}
-                      </span>
+                    <div className={cn("flex flex-col gap-1", isRTL && "items-end")}>
+                      <span className="text-[8px] opacity-40">{t.area || "Area"}</span>
+                      <div className={cn("flex items-center gap-1.5", isRTL && "flex-row-reverse")}>
+                        <div className="w-1 h-1 bg-white/20 rounded-full" />
+                        <span className="text-white">
+                          {language === 'ar' ? (order.areaNameAr || order.areaName) : order.areaName || order.selectedArea || t.deliveryArea}
+                        </span>
+                      </div>
                     </div>
+                  </div>
+
+                  <div className="p-4 bg-white/5 rounded-xl mb-6 space-y-2">
+                    <span className="text-[8px] font-black uppercase tracking-widest text-white/40">{t.deliveryAddress}</span>
+                    <p className="text-xs italic text-white/80">{order.address}</p>
+                    {order.notes && (
+                      <div className="mt-2 pt-2 border-t border-white/5">
+                        <span className="text-[8px] font-black uppercase tracking-widest text-white/40">{t.notesLabel || "Notes"}</span>
+                        <p className="text-xs text-white/60">{order.notes}</p>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-2 mb-4">
                     {order.items.map((item, idx) => (
-                      <div key={idx} className="flex justify-between text-xs font-medium">
+                      <div key={idx} className={cn("flex justify-between text-xs font-medium", isRTL && "flex-row-reverse")}>
                         <span className="opacity-60">{item.quantity}x {item.name}</span>
                         <span className="font-mono">{item.price * item.quantity} {t.egp}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="pt-4 border-t border-white/5 flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40">{t.orderTotal}</span>
-                    <span className="text-xl font-display font-black text-primary italic">
-                      {order.total} {t.egp}
-                    </span>
+                  {order.appliedOffers && order.appliedOffers.length > 0 && (
+                    <div className="space-y-1 mb-4 border-t border-white/5 pt-4">
+                      {order.appliedOffers.map((offer, idx) => (
+                        <div key={idx} className={cn("flex justify-between text-[10px] font-bold text-green-500 italic", isRTL && "flex-row-reverse")}>
+                          <span>{language === 'ar' ? offer.titleAr : offer.title}</span>
+                          <span>-{offer.discountAmount} {t.egp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-white/5 space-y-2">
+                    <div className={cn("flex justify-between text-[10px] font-black uppercase tracking-widest opacity-40", isRTL && "flex-row-reverse")}>
+                      <span>{t.subtotal}</span>
+                      <span>{order.subtotal || (order.total - (order.deliveryFee || 0) + (order.discount || 0))} {t.egp}</span>
+                    </div>
+                    {order.discount > 0 && (
+                      <div className={cn("flex justify-between text-[10px] font-black uppercase tracking-widest text-green-500", isRTL && "flex-row-reverse")}>
+                        <span>{t.discount || "Discount"}</span>
+                        <span>-{order.discount} {t.egp}</span>
+                      </div>
+                    )}
+                    <div className={cn("flex justify-between text-[10px] font-black uppercase tracking-widest opacity-40", isRTL && "flex-row-reverse")}>
+                      <span>{t.deliveryFee}</span>
+                      <span>{order.deliveryFee || 0} {t.egp}</span>
+                    </div>
+                    <div className={cn("flex justify-between items-center pt-2 mt-2 border-t border-white/5", isRTL && "flex-row-reverse")}>
+                      <span className="text-xs font-black uppercase tracking-widest text-white">{t.orderTotal}</span>
+                      <span className="text-xl font-display font-black text-primary italic">
+                        {order.total} {t.egp}
+                      </span>
+                    </div>
                   </div>
 
                   {order.status === "Cancelled" && order.cancelReason && (

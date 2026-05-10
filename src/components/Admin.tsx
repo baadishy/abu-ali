@@ -24,10 +24,18 @@ interface Order {
   discount: number;
   deliveryFee: number;
   selectedArea: string;
+  branchId?: string;
+  branchName?: string;
+  branchNameAr?: string;
+  areaId?: string;
+  areaName?: string;
+  areaNameAr?: string;
+  appliedOffers?: { title: string; titleAr: string; discountAmount: number }[];
   total: number;
   status: string;
   createdAt: string;
   notes?: string;
+  cancelReason?: string;
 }
 
 interface Customer {
@@ -2505,18 +2513,24 @@ function OrderCard({ order, onStatusChange, onDelete, t, formatDate, isRTL }: an
               {order.status === "Cancelled" && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded not-italic whitespace-nowrap">{t.cancelled}</span>}
             </h4>
             <p className="text-primary font-mono text-sm md:text-base">{order.phone}</p>
-            <div className="mt-2 space-y-1">
-              <p className="text-xs text-white/40 italic flex items-start md:items-center gap-2">
-                <MapPin size={10} className="text-primary mt-1 md:mt-0" />
-                <span className="flex-1 line-clamp-2 md:line-clamp-none">{order.address}</span>
-              </p>
-              <div className={cn("flex flex-wrap gap-2", isRTL && "flex-row-reverse")}>
-                <p className="text-[9px] md:text-[10px] font-black uppercase text-primary/60 px-3 md:px-4 py-1 bg-primary/5 rounded-full inline-block">
-                  {isRTL ? (order.branchNameAr || order.branchName) : (order.branchName || order.branchNameAr)}
-                </p>
-                <p className="text-[9px] md:text-[10px] font-black uppercase text-white/40 px-3 md:px-4 py-1 bg-white/5 rounded-full inline-block">
-                  {isRTL ? (order.areaNameAr || order.areaName || order.selectedArea) : (order.areaName || order.areaNameAr || order.selectedArea)}
-                </p>
+            <div className="mt-2 space-y-3">
+              <div className="p-4 bg-white/5 border border-white/10 rounded-xl space-y-2">
+                <span className="text-[8px] font-black uppercase tracking-widest text-white/40">{t.deliveryAddress || "Delivery Address"}</span>
+                <p className="text-xs italic text-white/80">{order.address}</p>
+              </div>
+              <div className={cn("grid grid-cols-2 gap-3", isRTL && "flex-row-reverse")}>
+                <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                  <span className="text-[7px] font-black uppercase tracking-widest text-primary/60">{t.branch || "Branch"}</span>
+                  <p className="text-[10px] font-black uppercase text-white truncate">
+                    {isRTL ? (order.branchNameAr || order.branchName) : (order.branchName || order.branchNameAr)}
+                  </p>
+                </div>
+                <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-1">
+                  <span className="text-[7px] font-black uppercase tracking-widest opacity-40">{t.area || "Area"}</span>
+                  <p className="text-[10px] font-black uppercase text-white truncate">
+                    {isRTL ? (order.areaNameAr || order.areaName || order.selectedArea) : (order.areaName || order.areaNameAr || order.selectedArea)}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -2534,11 +2548,28 @@ function OrderCard({ order, onStatusChange, onDelete, t, formatDate, isRTL }: an
               </div>
             ))}
           </div>
+          {order.appliedOffers && order.appliedOffers.length > 0 && (
+            <div className="space-y-1 py-4 border-t border-white/5">
+              <p className="text-[8px] font-black uppercase opacity-40 mb-2">{isRTL ? "العروض المطبقة" : "Applied Offers"}</p>
+              {order.appliedOffers.map((offer: any, idx: number) => (
+                <div key={idx} className={cn("flex justify-between text-[10px] font-bold text-green-500 italic", isRTL && "flex-row-reverse")}>
+                  <span>{isRTL ? offer.titleAr : offer.title}</span>
+                  <span>-{offer.discountAmount} {t.egp}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div className="space-y-2 pt-2">
             <div className={cn("flex justify-between text-[9px] md:text-[10px] uppercase font-black opacity-40 italic", isRTL && "flex-row-reverse")}>
                <span>{t.subtotal}</span>
-               <span className="whitespace-nowrap">{order.subtotal || (order.total - (order.deliveryFee || 0))} {t.egp}</span>
+               <span className="whitespace-nowrap">{order.subtotal || (order.total - (order.deliveryFee || 0) + (order.discount || 0))} {t.egp}</span>
             </div>
+            {order.discount > 0 && (
+              <div className={cn("flex justify-between text-[9px] md:text-[10px] uppercase font-black text-green-500 italic", isRTL && "flex-row-reverse")}>
+                 <span>{t.discount || "Discount"}</span>
+                 <span className="whitespace-nowrap">-{order.discount} {t.egp}</span>
+              </div>
+            )}
             <div className={cn("flex justify-between text-[9px] md:text-[10px] uppercase font-black opacity-40 italic", isRTL && "flex-row-reverse")}>
                <span>{t.deliveryFee}</span>
                <span className="text-primary whitespace-nowrap">{order.deliveryFee || 0} {t.egp}</span>

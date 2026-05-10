@@ -265,6 +265,11 @@ function AppContent() {
           areaId: orderData.areaId,
           areaName: selectedArea?.name || "",
           areaNameAr: selectedArea?.nameAr || "",
+          appliedOffers: appliedOffers.map(o => ({
+            title: o.title,
+            titleAr: o.titleAr,
+            discountAmount: o.discountAmount
+          })),
           total: total
         })
       });

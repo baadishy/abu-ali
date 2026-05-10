@@ -164,6 +164,10 @@ export const translations = {
     addCategory: "Add Category",
     editCategory: "Edit Category",
     saveCategory: "Save Category",
+    isRTL: false,
+    branch: "Branch",
+    area: "Area",
+    discount: "Discount",
     itemsTab: "Items"
   },
   ar: {
@@ -329,6 +333,10 @@ export const translations = {
     addCategory: "إضافة تصنيف",
     editCategory: "تعديل التصنيف",
     saveCategory: "حفظ التصنيف",
+    isRTL: true,
+    branch: "الفرع",
+    area: "المنطقة",
+    discount: "الخصم",
     itemsTab: "الأصناف"
   }
 };

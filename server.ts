@@ -128,6 +128,7 @@ async function startServer() {
     phone: String,
     address: String,
     notes: String,
+    appliedOffers: [{ title: String, titleAr: String, discountAmount: Number }],
     status: { type: String, default: "Pending" },
     cancelReason: String,
     createdAt: { type: Date, default: Date.now },
