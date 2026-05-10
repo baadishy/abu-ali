@@ -49,12 +49,7 @@ export interface Order {
   customerName: string;
   phone: string;
   address: string;
-  status:
-    | "Pending"
-    | "Preparing"
-    | "Out for Delivery"
-    | "Completed"
-    | "Cancelled";
+  status: "Pending" | "Preparing" | "Out for Delivery" | "Completed" | "Cancelled";
   cancelReason?: string;
   notes?: string;
   createdAt?: string;
@@ -76,7 +71,7 @@ export interface PromotionalOffer {
   image: string;
   imagePublicId?: string;
   isActive: boolean;
-  type: "buy_x_get_y" | "fixed_discount" | "percentage_discount" | "manual";
+  type: 'buy_x_get_y' | 'fixed_discount' | 'percentage_discount' | 'manual';
   buyQuantity?: number;
   getQuantity?: number;
   categoryLimit?: string; // Category slug

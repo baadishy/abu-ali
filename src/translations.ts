@@ -155,7 +155,16 @@ export const translations = {
     areaFee: "Delivery Fee for this Area",
     openingTime: "Opening Time",
     closingTime: "Closing Time",
-    open24Hours: "Open 24 Hours"
+    open24Hours: "Open 24 Hours",
+    categories: "Categories",
+    categoryNameEn: "Category Name (EN)",
+    categoryNameAr: "Category Name (AR)",
+    categorySlug: "Slug / URL",
+    categoryOrder: "Display Order",
+    addCategory: "Add Category",
+    editCategory: "Edit Category",
+    saveCategory: "Save Category",
+    itemsTab: "Items"
   },
   ar: {
     brandName: "أبو علي فرايد تشيكن",
@@ -311,6 +320,15 @@ export const translations = {
     areaFee: "سعر التوصيل لهذه المنطقة",
     openingTime: "وقت الفتح",
     closingTime: "وقت الإغلاق",
-    open24Hours: "مفتوح 24 ساعة"
+    open24Hours: "مفتوح 24 ساعة",
+    categories: "التصنيفات",
+    categoryNameEn: "اسم التصنيف (EN)",
+    categoryNameAr: "اسم التصنيف (AR)",
+    categorySlug: "المعرف / الرابط",
+    categoryOrder: "ترتيب العرض",
+    addCategory: "إضافة تصنيف",
+    editCategory: "تعديل التصنيف",
+    saveCategory: "حفظ التصنيف",
+    itemsTab: "الأصناف"
   }
 };

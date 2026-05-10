@@ -1,38 +1,11 @@
 import React from "react";
-import {
-  Upload,
-  Plus,
-  Trash2,
-  Camera,
-  LogOut,
-  Package,
-  Users,
-  Utensils,
-  Edit2,
-  Check,
-  X,
-  RefreshCw,
-  Settings as SettingsIcon,
-  Facebook,
-  Instagram,
-  Phone,
-  MapPin,
-  Globe,
-  ChevronRight,
-  ChevronDown,
-  AlertTriangle,
-  Zap,
-  Languages,
-  Save,
+import { 
+  Upload, Plus, Trash2, Camera, LogOut, Package, Users, 
+  Utensils, Edit2, Check, X, RefreshCw, Settings as SettingsIcon, 
+  Facebook, Instagram, Phone, MapPin, Globe, ChevronRight, ChevronDown, AlertTriangle,
+  Zap, Languages, Save
 } from "lucide-react";
-import {
-  MenuItem,
-  Category,
-  SiteSettings,
-  Area,
-  ItemVariant,
-  PromotionalOffer,
-} from "../types";
+import { MenuItem, Category, SiteSettings, Area, ItemVariant, PromotionalOffer } from "../types";
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
@@ -77,15 +50,15 @@ export function Admin() {
 
   React.useEffect(() => {
     if (isLoggedIn) {
-      if (activeTab === "orders") fetchOrders();
-      if (activeTab === "users") fetchCustomers();
-      if (activeTab === "menu") {
+      if (activeTab === 'orders') fetchOrders();
+      if (activeTab === 'users') fetchCustomers();
+      if (activeTab === 'menu') {
         fetchItems();
         fetchCategories();
       }
     }
   }, [activeTab, isLoggedIn]);
-
+  
   const fetchCategories = async () => {
     try {
       const res = await fetch("/api/admin/categories");
@@ -96,29 +69,23 @@ export function Admin() {
       console.error("Fetch categories error:", err);
     }
   };
-
+  
   const [items, setItems] = React.useState<MenuItem[]>([]);
   const [categories, setCategories] = React.useState<Category[]>([]);
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [customers, setCustomers] = React.useState<Customer[]>([]);
-  const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(
-    null,
-  );
-
-  const [inventorySubTab, setInventorySubTab] = React.useState<
-    "items" | "categories"
-  >("items");
-
+  const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(null);
+  
+  const [inventorySubTab, setInventorySubTab] = React.useState<"items" | "categories">("items");
+  
   const [categoryFormData, setCategoryFormData] = React.useState({
     name: "",
     nameAr: "",
     slug: "",
-    order: 0,
+    order: 0
   });
-  const [editingCategoryId, setEditingCategoryId] = React.useState<
-    string | null
-  >(null);
-
+  const [editingCategoryId, setEditingCategoryId] = React.useState<string | null>(null);
+  
   const [offerFormData, setOfferFormData] = React.useState<PromotionalOffer>({
     id: "",
     title: "",
@@ -128,36 +95,24 @@ export function Admin() {
     image: "",
     imagePublicId: "",
     isActive: true,
-    type: "manual",
+    type: 'manual',
     buyQuantity: 0,
     getQuantity: 0,
     categoryLimit: undefined,
     discountValue: 0,
-    branchIds: [],
+    branchIds: []
   });
-  const [editingOfferId, setEditingOfferId] = React.useState<string | null>(
-    null,
-  );
+  const [editingOfferId, setEditingOfferId] = React.useState<string | null>(null);
 
   const [loading, setLoading] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
   const [editingItem, setEditingItem] = React.useState<MenuItem | null>(null);
-  const [confirmStatus, setConfirmStatus] = React.useState<{
-    orderId: string;
-    status: string;
-  } | null>(null);
+  const [confirmStatus, setConfirmStatus] = React.useState<{ orderId: string, status: string } | null>(null);
   const [cancelReason, setCancelReason] = React.useState("");
   const [deliveryFeeUpdate, setDeliveryFeeUpdate] = React.useState<number>(0);
-  const [genericConfirm, setGenericConfirm] = React.useState<{
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    isDangerous?: boolean;
-  } | null>(null);
-  const [expandedBranches, setExpandedBranches] = React.useState<
-    Record<string, boolean>
-  >({});
-
+  const [genericConfirm, setGenericConfirm] = React.useState<{ title: string, message: string, onConfirm: () => void, isDangerous?: boolean } | null>(null);
+  const [expandedBranches, setExpandedBranches] = React.useState<Record<string, boolean>>({});
+  
   const getStatusTranslation = (status: string) => {
     const s = status.toLowerCase();
     if (s === "pending") return t.pending;
@@ -170,8 +125,8 @@ export function Admin() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
@@ -188,8 +143,8 @@ export function Admin() {
     descriptionAr: "",
     isAvailable: true,
     variants: [
-      { id: "default-single", name: "Single", nameAr: "سنجل", price: 0 },
-    ] as ItemVariant[],
+      { id: "default-single", name: "Single", nameAr: "سنجل", price: 0 }
+    ] as ItemVariant[]
   });
 
   const [discountPercent, setDiscountPercent] = React.useState<number>(0);
@@ -198,18 +153,16 @@ export function Admin() {
   // Auto-translation logic for Menu Items
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (formData.name && !formData.nameAr) translateField("name", true);
-      if (!formData.name && formData.nameAr) translateField("name", false);
+      if (formData.name && !formData.nameAr) translateField('name', true);
+      if (!formData.name && formData.nameAr) translateField('name', false);
     }, 1500);
     return () => clearTimeout(timer);
   }, [formData.name, formData.nameAr]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (formData.description && !formData.descriptionAr)
-        translateField("description", true);
-      if (!formData.description && formData.descriptionAr)
-        translateField("description", false);
+      if (formData.description && !formData.descriptionAr) translateField('description', true);
+      if (!formData.description && formData.descriptionAr) translateField('description', false);
     }, 2000);
     return () => clearTimeout(timer);
   }, [formData.description, formData.descriptionAr]);
@@ -217,20 +170,16 @@ export function Admin() {
   // Auto-translation logic for Offers
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (offerFormData.title && !offerFormData.titleAr)
-        translateOfferField("title", true);
-      if (!offerFormData.title && offerFormData.titleAr)
-        translateOfferField("title", false);
+      if (offerFormData.title && !offerFormData.titleAr) translateOfferField('title', true);
+      if (!offerFormData.title && offerFormData.titleAr) translateOfferField('title', false);
     }, 1500);
     return () => clearTimeout(timer);
   }, [offerFormData.title, offerFormData.titleAr]);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (offerFormData.description && !offerFormData.descriptionAr)
-        translateOfferField("description", true);
-      if (!offerFormData.description && offerFormData.descriptionAr)
-        translateOfferField("description", false);
+      if (offerFormData.description && !offerFormData.descriptionAr) translateOfferField('description', true);
+      if (!offerFormData.description && offerFormData.descriptionAr) translateOfferField('description', false);
     }, 2000);
     return () => clearTimeout(timer);
   }, [offerFormData.description, offerFormData.descriptionAr]);
@@ -239,20 +188,15 @@ export function Admin() {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = editingCategoryId
-        ? `/api/admin/categories/${editingCategoryId}`
-        : "/api/admin/categories";
+      const url = editingCategoryId ? `/api/admin/categories/${editingCategoryId}` : "/api/admin/categories";
       const method = editingCategoryId ? "PUT" : "POST";
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(categoryFormData),
+        body: JSON.stringify(categoryFormData)
       });
       if (res.ok) {
-        showNotification(
-          "success",
-          isRTL ? "تم حفظ التصنيف" : "Category saved",
-        );
+        showNotification("success", isRTL ? "تم حفظ التصنيف" : "Category saved");
         setCategoryFormData({ name: "", nameAr: "", slug: "", order: 0 });
         setEditingCategoryId(null);
         fetchCategories();
@@ -267,50 +211,39 @@ export function Admin() {
   const deleteCategory = async (id: string) => {
     setGenericConfirm({
       title: isRTL ? "حذف التصنيف" : "Delete Category",
-      message: isRTL
-        ? "هل أنت متأكد من حذف هذا التصنيف؟"
-        : "Are you sure you want to delete this category?",
+      message: isRTL ? "هل أنت متأكد من حذف هذا التصنيف؟" : "Are you sure you want to delete this category?",
       isDangerous: true,
       onConfirm: async () => {
         try {
           await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
           fetchCategories();
-          showNotification(
-            "success",
-            isRTL ? "تم حذف التصنيف" : "Category deleted",
-          );
+          showNotification("success", isRTL ? "تم حذف التصنيف" : "Category deleted");
         } catch (err) {
           console.error("Delete category error:", err);
         }
-      },
+      }
     });
   };
-
+  
   // Auto-populate branchIds for new offers if empty
   React.useEffect(() => {
-    if (
-      siteSettings?.branches &&
-      !editingOfferId &&
-      offerFormData.branchIds.length === 0
-    ) {
-      setOfferFormData((prev) => ({
+    if (siteSettings?.branches && !editingOfferId && offerFormData.branchIds.length === 0) {
+      setOfferFormData(prev => ({
         ...prev,
-        branchIds: siteSettings.branches.map((b) => b.id),
+        branchIds: siteSettings.branches.map(b => b.id)
       }));
     }
   }, [siteSettings?.branches, editingOfferId]);
 
   const toggleBranch = (id: string) => {
-    setExpandedBranches((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpandedBranches(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   // Auto-translation logic for Store Name
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      if (siteSettings?.storeName && !siteSettings.storeNameAr)
-        translateStoreName(true);
-      if (!siteSettings?.storeName && siteSettings?.storeNameAr)
-        translateStoreName(false);
+      if (siteSettings?.storeName && !siteSettings.storeNameAr) translateStoreName(true);
+      if (!siteSettings?.storeName && siteSettings?.storeNameAr) translateStoreName(false);
     }, 1500);
     return () => clearTimeout(timer);
   }, [siteSettings?.storeName, siteSettings?.storeNameAr]);
@@ -319,60 +252,54 @@ export function Admin() {
   React.useEffect(() => {
     if (!siteSettings?.branches) return;
     const timers: NodeJS.Timeout[] = [];
-
-    siteSettings.branches.forEach((branch) => {
+    
+    siteSettings.branches.forEach(branch => {
       // Name Auto-Translation
       const nameTimer = setTimeout(() => {
-        if (branch.name && !branch.nameAr)
-          translateBranchField(branch.id, "name", true);
-        if (!branch.name && branch.nameAr)
-          translateBranchField(branch.id, "name", false);
+        if (branch.name && !branch.nameAr) translateBranchField(branch.id, 'name', true);
+        if (!branch.name && branch.nameAr) translateBranchField(branch.id, 'name', false);
       }, 1000);
 
       // Address Auto-Translation
       const addrTimer = setTimeout(() => {
-        if (branch.address && !branch.addressAr)
-          translateBranchField(branch.id, "address", true);
-        if (!branch.address && branch.addressAr)
-          translateBranchField(branch.id, "address", false);
+        if (branch.address && !branch.addressAr) translateBranchField(branch.id, 'address', true);
+        if (!branch.address && branch.addressAr) translateBranchField(branch.id, 'address', false);
       }, 1200);
 
       timers.push(nameTimer, addrTimer);
 
       // Areas Auto-Translation
-      (branch.areas || []).forEach((area) => {
+      (branch.areas || []).forEach(area => {
         const areaTimer = setTimeout(() => {
-          if (area.name && !area.nameAr)
-            translateAreaField(branch.id, area.id, "name", true);
-          if (!area.name && area.nameAr)
-            translateAreaField(branch.id, area.id, "name", false);
+          if (area.name && !area.nameAr) translateAreaField(branch.id, area.id, 'name', true);
+          if (!area.name && area.nameAr) translateAreaField(branch.id, area.id, 'name', false);
         }, 1500);
         timers.push(areaTimer);
       });
     });
 
-    return () => timers.forEach((t) => clearTimeout(t));
+    return () => timers.forEach(t => clearTimeout(t));
   }, [JSON.stringify(siteSettings?.branches)]);
 
   // Auto-translation logic for Variants
   React.useEffect(() => {
     const timers: NodeJS.Timeout[] = [];
-    formData.variants.forEach((variant) => {
+    formData.variants.forEach(variant => {
       const timer = setTimeout(() => {
         if (variant.name && !variant.nameAr) {
-          translateText(variant.name, "en", "ar").then((trans) => {
-            if (trans) updateVariant(variant.id, "nameAr", trans);
+          translateText(variant.name, 'en', 'ar').then(trans => {
+            if (trans) updateVariant(variant.id, 'nameAr', trans);
           });
         }
         if (!variant.name && variant.nameAr) {
-          translateText(variant.nameAr, "ar", "en").then((trans) => {
-            if (trans) updateVariant(variant.id, "name", trans);
+          translateText(variant.nameAr, 'ar', 'en').then(trans => {
+            if (trans) updateVariant(variant.id, 'name', trans);
           });
         }
       }, 2000);
       timers.push(timer);
     });
-    return () => timers.forEach((t) => clearTimeout(t));
+    return () => timers.forEach(t => clearTimeout(t));
   }, [JSON.stringify(formData.variants)]);
 
   const calculateDiscountByPercent = (percent: number, basePrice: number) => {
@@ -384,24 +311,15 @@ export function Admin() {
   const handlePercentChange = (percent: number) => {
     setDiscountPercent(percent);
     if (formData.price > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        discountPrice: calculateDiscountByPercent(percent, prev.price),
-      }));
+      setFormData(prev => ({ ...prev, discountPrice: calculateDiscountByPercent(percent, prev.price) }));
     }
   };
 
-  const translateText = async (
-    text: string,
-    from: "en" | "ar",
-    to: "en" | "ar",
-  ) => {
+  const translateText = async (text: string, from: 'en' | 'ar', to: 'en' | 'ar') => {
     if (!text) return "";
     setLoading(true);
     try {
-      const res = await fetch(
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`,
-      );
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${from}|${to}`);
       if (!res.ok) return "";
       const data = await res.json();
       return data?.responseData?.translatedText || "";
@@ -414,65 +332,38 @@ export function Admin() {
     }
   };
 
-  const translateOfferField = async (
-    field: "title" | "description",
-    toArabic: boolean,
-  ) => {
-    const text =
-      field === "title"
-        ? toArabic
-          ? offerFormData.title
-          : offerFormData.titleAr
-        : toArabic
-          ? offerFormData.description
-          : offerFormData.descriptionAr;
+  const translateOfferField = async (field: 'title' | 'description', toArabic: boolean) => {
+    const text = field === 'title' 
+      ? (toArabic ? offerFormData.title : offerFormData.titleAr) 
+      : (toArabic ? offerFormData.description : offerFormData.descriptionAr);
 
     if (!text) return;
-    const translated = await translateText(
-      text,
-      toArabic ? "en" : "ar",
-      toArabic ? "ar" : "en",
-    );
+    const translated = await translateText(text, toArabic ? 'en' : 'ar', toArabic ? 'ar' : 'en');
     if (translated) {
-      if (field === "title") {
-        if (toArabic)
-          setOfferFormData((prev) => ({ ...prev, titleAr: translated }));
-        else setOfferFormData((prev) => ({ ...prev, title: translated }));
+      if (field === 'title') {
+        if (toArabic) setOfferFormData(prev => ({ ...prev, titleAr: translated }));
+        else setOfferFormData(prev => ({ ...prev, title: translated }));
       } else {
-        if (toArabic)
-          setOfferFormData((prev) => ({ ...prev, descriptionAr: translated }));
-        else setOfferFormData((prev) => ({ ...prev, description: translated }));
+        if (toArabic) setOfferFormData(prev => ({ ...prev, descriptionAr: translated }));
+        else setOfferFormData(prev => ({ ...prev, description: translated }));
       }
     }
   };
 
-  const translateField = async (
-    field: "name" | "description",
-    toArabic: boolean,
-  ) => {
-    const text =
-      field === "name"
-        ? toArabic
-          ? formData.name
-          : formData.nameAr
-        : toArabic
-          ? formData.description
-          : formData.descriptionAr;
+  const translateField = async (field: 'name' | 'description', toArabic: boolean) => {
+    const text = field === 'name' 
+      ? (toArabic ? formData.name : formData.nameAr) 
+      : (toArabic ? formData.description : formData.descriptionAr);
 
     if (!text) return;
-    const translated = await translateText(
-      text,
-      toArabic ? "en" : "ar",
-      toArabic ? "ar" : "en",
-    );
+    const translated = await translateText(text, toArabic ? 'en' : 'ar', toArabic ? 'ar' : 'en');
     if (translated) {
-      if (field === "name") {
-        if (toArabic) setFormData((prev) => ({ ...prev, nameAr: translated }));
-        else setFormData((prev) => ({ ...prev, name: translated }));
+      if (field === 'name') {
+        if (toArabic) setFormData(prev => ({ ...prev, nameAr: translated }));
+        else setFormData(prev => ({ ...prev, name: translated }));
       } else {
-        if (toArabic)
-          setFormData((prev) => ({ ...prev, descriptionAr: translated }));
-        else setFormData((prev) => ({ ...prev, description: translated }));
+        if (toArabic) setFormData(prev => ({ ...prev, descriptionAr: translated }));
+        else setFormData(prev => ({ ...prev, description: translated }));
       }
     }
   };
@@ -482,71 +373,41 @@ export function Admin() {
     const text = toArabic ? siteSettings.storeName : siteSettings.storeNameAr;
     if (!text) return;
 
-    const translated = await translateText(
-      text,
-      toArabic ? "en" : "ar",
-      toArabic ? "ar" : "en",
-    );
+    const translated = await translateText(text, toArabic ? 'en' : 'ar', toArabic ? 'ar' : 'en');
     if (translated) {
-      if (toArabic)
-        setSiteSettings((prev) =>
-          prev ? { ...prev, storeNameAr: translated } : null,
-        );
-      else
-        setSiteSettings((prev) =>
-          prev ? { ...prev, storeName: translated } : null,
-        );
+      if (toArabic) setSiteSettings(prev => prev ? { ...prev, storeNameAr: translated } : null);
+      else setSiteSettings(prev => prev ? { ...prev, storeName: translated } : null);
     }
   };
 
-  const translateBranchField = async (
-    branchId: string,
-    field: "name" | "address",
-    toArabic: boolean,
-  ) => {
+  const translateBranchField = async (branchId: string, field: 'name' | 'address', toArabic: boolean) => {
     if (!siteSettings) return;
-    const branch = siteSettings?.branches?.find((b) => b.id === branchId);
+    const branch = siteSettings?.branches?.find(b => b.id === branchId);
     if (!branch) return;
 
-    const text =
-      field === "name"
-        ? toArabic
-          ? branch.name
-          : branch.nameAr
-        : toArabic
-          ? branch.address
-          : branch.addressAr;
+    const text = field === 'name'
+      ? (toArabic ? branch.name : branch.nameAr)
+      : (toArabic ? branch.address : branch.addressAr);
 
     if (!text) return;
-    const translated = await translateText(
-      text,
-      toArabic ? "en" : "ar",
-      toArabic ? "ar" : "en",
-    );
+    const translated = await translateText(text, toArabic ? 'en' : 'ar', toArabic ? 'ar' : 'en');
     if (translated) {
-      const targetField =
-        field === "name"
-          ? toArabic
-            ? "nameAr"
-            : "name"
-          : toArabic
-            ? "addressAr"
-            : "address";
+      const targetField = field === 'name' ? (toArabic ? 'nameAr' : 'name') : (toArabic ? 'addressAr' : 'address');
       updateBranch(branchId, targetField, translated);
     }
   };
 
   const addVariant = () => {
     const variants = formData.variants;
-    const hasSingle = variants.some((v) => v.name.toLowerCase() === "single");
-    const hasDouble = variants.some((v) => v.name.toLowerCase() === "double");
-    const hasTriple = variants.some((v) => v.name.toLowerCase() === "triple");
+    const hasSingle = variants.some(v => v.name.toLowerCase() === 'single');
+    const hasDouble = variants.some(v => v.name.toLowerCase() === 'double');
+    const hasTriple = variants.some(v => v.name.toLowerCase() === 'triple');
 
     if (hasTriple) return; // Max reached
 
     let name = "Single";
     let nameAr = "سنجل";
-
+    
     if (hasSingle && !hasDouble) {
       name = "Double";
       nameAr = "دابل";
@@ -559,52 +420,39 @@ export function Admin() {
       id: Math.random().toString(36).substr(2, 9),
       name,
       nameAr,
-      price: formData.price,
+      price: formData.price
     };
-    setFormData((prev) => ({
-      ...prev,
-      variants: [...prev.variants, newVariant],
-    }));
+    setFormData(prev => ({ ...prev, variants: [...prev.variants, newVariant] }));
   };
 
   const removeVariant = (id: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      variants: prev.variants.filter((v) => v.id !== id),
-    }));
+    setFormData(prev => ({ ...prev, variants: prev.variants.filter(v => v.id !== id) }));
   };
 
   const updateVariant = (id: string, field: keyof ItemVariant, value: any) => {
-    setFormData((prev) => {
-      const newVariants = prev.variants.map((v) =>
-        v.id === id ? { ...v, [field]: value } : v,
-      );
-
+    setFormData(prev => {
+      const newVariants = prev.variants.map(v => v.id === id ? { ...v, [field]: value } : v);
+      
       // If updating price of Single, sync with main price
-      const variant = newVariants?.find((v) => v.id === id);
-      const isSingle = variant?.name.toLowerCase() === "single";
-
+      const variant = newVariants?.find(v => v.id === id);
+      const isSingle = variant?.name.toLowerCase() === 'single';
+      
       return {
         ...prev,
         variants: newVariants,
-        price: isSingle && field === "price" ? value : prev.price,
+        price: (isSingle && field === 'price') ? value : prev.price
       };
     });
   };
 
   React.useEffect(() => {
     if (formData.price > 0 && discountPercent > 0) {
-      setFormData((prev) => ({
-        ...prev,
-        discountPrice: calculateDiscountByPercent(discountPercent, prev.price),
-      }));
+      setFormData(prev => ({ ...prev, discountPrice: calculateDiscountByPercent(discountPercent, prev.price) }));
     }
     // Sync main price with Single variant
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      variants: prev.variants.map((v) =>
-        v.name.toLowerCase() === "single" ? { ...v, price: prev.price } : v,
-      ),
+      variants: prev.variants.map(v => v.name.toLowerCase() === 'single' ? { ...v, price: prev.price } : v)
     }));
   }, [formData.price]);
 
@@ -628,10 +476,7 @@ export function Admin() {
       const res = await fetch("/api/settings");
       if (!res.ok) {
         const text = await res.text();
-        console.error(
-          `Admin Settings Fetch Error (${res.status}):`,
-          text.slice(0, 500),
-        );
+        console.error(`Admin Settings Fetch Error (${res.status}):`, text.slice(0, 500));
         return;
       }
       const data = await res.json();
@@ -642,7 +487,7 @@ export function Admin() {
         data.branches = data.branches.map((b: any) => ({
           ...b,
           deliveryFee: b.deliveryFee ?? data.defaultDeliveryFee ?? 0,
-          areas: b.areas ?? [],
+          areas: b.areas ?? []
         }));
       }
       setSiteSettings(data);
@@ -652,14 +497,14 @@ export function Admin() {
   };
 
   const addHotlineNumber = () => {
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
       return { ...prev, hotlineNumbers: [...(prev.hotlineNumbers || []), ""] };
     });
   };
 
   const updateHotlineNumber = (index: number, value: string) => {
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
       const hotlineNumbers = [...(prev.hotlineNumbers || [])];
       hotlineNumbers[index] = value;
@@ -668,14 +513,9 @@ export function Admin() {
   };
 
   const removeHotlineNumber = (index: number) => {
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      return {
-        ...prev,
-        hotlineNumbers: (prev.hotlineNumbers || []).filter(
-          (_, i) => i !== index,
-        ),
-      };
+      return { ...prev, hotlineNumbers: (prev.hotlineNumbers || []).filter((_, i) => i !== index) };
     });
   };
 
@@ -684,10 +524,7 @@ export function Admin() {
       const res = await fetch("/api/admin/menu");
       if (!res.ok) {
         const text = await res.text();
-        console.error(
-          `Admin Menu Fetch Error (${res.status}):`,
-          text.slice(0, 500),
-        );
+        console.error(`Admin Menu Fetch Error (${res.status}):`, text.slice(0, 500));
         return;
       }
       const data = await res.json();
@@ -702,10 +539,7 @@ export function Admin() {
       const res = await fetch("/api/admin/orders");
       if (!res.ok) {
         const text = await res.text();
-        console.error(
-          `Admin Orders Fetch Error (${res.status}):`,
-          text.slice(0, 500),
-        );
+        console.error(`Admin Orders Fetch Error (${res.status}):`, text.slice(0, 500));
         return;
       }
       const data = await res.json();
@@ -720,10 +554,7 @@ export function Admin() {
       const res = await fetch("/api/admin/customers");
       if (!res.ok) {
         const text = await res.text();
-        console.error(
-          `Admin Customers Fetch Error (${res.status}):`,
-          text.slice(0, 500),
-        );
+        console.error(`Admin Customers Fetch Error (${res.status}):`, text.slice(0, 500));
         return;
       }
       const data = await res.json();
@@ -757,14 +588,12 @@ export function Admin() {
   const handleLogout = () => {
     setGenericConfirm({
       title: isRTL ? "تسجيل الخروج" : "Logout",
-      message: isRTL
-        ? "هل أنت متأكد أنك تريد تسجيل الخروج من لوحة التحكم؟"
-        : "Are you sure you want to log out of the admin panel?",
+      message: isRTL ? "هل أنت متأكد أنك تريد تسجيل الخروج من لوحة التحكم؟" : "Are you sure you want to log out of the admin panel?",
       onConfirm: () => {
         localStorage.removeItem("admin-token");
         setIsLoggedIn(false);
         setGenericConfirm(null);
-      },
+      }
     });
   };
 
@@ -783,22 +612,10 @@ export function Admin() {
       });
       if (!res.ok) throw new Error("Upload failed");
       const data = await res.json();
-      setFormData((prev) => ({
-        ...prev,
-        image: data.url,
-        imagePublicId: data.public_id,
-      }));
-      showNotification(
-        "success",
-        isRTL ? "تم رفع الصورة" : "Image uploaded successfully",
-      );
+      setFormData(prev => ({ ...prev, image: data.url, imagePublicId: data.public_id }));
+      showNotification("success", isRTL ? "تم رفع الصورة" : "Image uploaded successfully");
     } catch (err) {
-      showNotification(
-        "error",
-        isRTL
-          ? "فشل الرفع. تأكد من إعدادات Cloudinary"
-          : "Upload failed. Check Cloudinary settings",
-      );
+      showNotification("error", isRTL ? "فشل الرفع. تأكد من إعدادات Cloudinary" : "Upload failed. Check Cloudinary settings");
     } finally {
       setUploading(false);
     }
@@ -808,17 +625,15 @@ export function Admin() {
     e.preventDefault();
     setLoading(true);
     try {
-      const url = editingItem
-        ? `/api/admin/menu/${editingItem._id}`
-        : "/api/admin/menu";
+      const url = editingItem ? `/api/admin/menu/${editingItem._id}` : "/api/admin/menu";
       const method = editingItem ? "PUT" : "POST";
-
+      
       const res = await fetch(url, {
         method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
+      
       if (res.ok) {
         resetForm();
         fetchItems();
@@ -843,8 +658,8 @@ export function Admin() {
       descriptionAr: "",
       isAvailable: true,
       variants: [
-        { id: "default-single", name: "Single", nameAr: "سنجل", price: 0 },
-      ],
+        { id: "default-single", name: "Single", nameAr: "سنجل", price: 0 }
+      ]
     });
     setEditingItem(null);
     setDiscountPercent(0);
@@ -864,7 +679,7 @@ export function Admin() {
       description: item.description || "",
       descriptionAr: item.descriptionAr || "",
       isAvailable: item.isAvailable,
-      variants: item.variants || [],
+      variants: item.variants || []
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -876,16 +691,9 @@ export function Admin() {
     try {
       let updatedOffers = [...(siteSettings.offers || [])];
       if (editingOfferId) {
-        updatedOffers = updatedOffers.map((o) =>
-          o.id === editingOfferId
-            ? { ...offerFormData, id: editingOfferId }
-            : o,
-        );
+        updatedOffers = updatedOffers.map(o => o.id === editingOfferId ? { ...offerFormData, id: editingOfferId } : o);
       } else {
-        updatedOffers.push({
-          ...offerFormData,
-          id: Math.random().toString(36).substr(2, 9),
-        });
+        updatedOffers.push({ ...offerFormData, id: Math.random().toString(36).substr(2, 9) });
       }
 
       const res = await fetch("/api/settings", {
@@ -895,21 +703,21 @@ export function Admin() {
       });
       if (res.ok) {
         setSiteSettings({ ...siteSettings, offers: updatedOffers });
-        setOfferFormData({
-          id: "",
-          title: "",
-          titleAr: "",
-          description: "",
-          descriptionAr: "",
-          image: "",
-          imagePublicId: "",
+        setOfferFormData({ 
+          id: "", 
+          title: "", 
+          titleAr: "", 
+          description: "", 
+          descriptionAr: "", 
+          image: "", 
+          imagePublicId: "", 
           isActive: true,
-          type: "manual",
+          type: 'manual',
           buyQuantity: 0,
           getQuantity: 0,
           categoryLimit: undefined,
           discountValue: 0,
-          branchIds: siteSettings?.branches?.map((b) => b.id) || [],
+          branchIds: siteSettings?.branches?.map(b => b.id) || []
         });
         setEditingOfferId(null);
         showNotification("success", t.updateSuccess);
@@ -925,14 +733,11 @@ export function Admin() {
     if (!siteSettings) return;
     setGenericConfirm({
       title: t.deleteItem,
-      message: isRTL
-        ? "هل أنت متأكد من حذف هذا العرض؟"
-        : "Are you sure you want to delete this offer?",
+      message: isRTL ? "هل أنت متأكد من حذف هذا العرض؟" : "Are you sure you want to delete this offer?",
       isDangerous: true,
       onConfirm: async () => {
-        const updatedOffers =
-          siteSettings.offers?.filter((o) => o.id !== id) || [];
-
+        const updatedOffers = siteSettings.offers?.filter(o => o.id !== id) || [];
+        
         // Remove image from Cloudinary
         if (imagePublicId) {
           try {
@@ -956,16 +761,15 @@ export function Admin() {
           showNotification("success", t.deleteItem);
         }
         setGenericConfirm(null);
-      },
+      }
     });
   };
 
   const handleEditOffer = (offer: any) => {
     setEditingOfferId(offer.id);
-    setOfferFormData({
-      ...offer,
-      branchIds:
-        offer.branchIds || siteSettings?.branches?.map((b) => b.id) || [],
+    setOfferFormData({ 
+      ...offer, 
+      branchIds: offer.branchIds || (siteSettings?.branches?.map(b => b.id) || [])
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -973,9 +777,7 @@ export function Admin() {
   const handleDeleteItem = async (id: string, imagePublicId?: string) => {
     setGenericConfirm({
       title: isRTL ? "حذف العنصر" : "Delete Item",
-      message: isRTL
-        ? "هل أنت متأكد من حذف هذا الصنف من القائمة؟"
-        : "Are you sure you want to delete this item from the menu?",
+      message: isRTL ? "هل أنت متأكد من حذف هذا الصنف من القائمة؟" : "Are you sure you want to delete this item from the menu?",
       isDangerous: true,
       onConfirm: async () => {
         try {
@@ -994,23 +796,16 @@ export function Admin() {
 
           await fetch(`/api/admin/menu/${id}`, { method: "DELETE" });
           fetchItems();
-          showNotification(
-            "success",
-            isRTL ? "تم حذف العنصر بنجاح" : "Item deleted successfully",
-          );
+          showNotification("success", isRTL ? "تم حذف العنصر بنجاح" : "Item deleted successfully");
         } catch (err) {
           showNotification("error", "Failed to delete item");
         }
         setGenericConfirm(null);
-      },
+      }
     });
   };
 
-  const handleUpdateOrderStatus = async (
-    orderId: string,
-    status: string,
-    reason?: string,
-  ) => {
+  const handleUpdateOrderStatus = async (orderId: string, status: string, reason?: string) => {
     try {
       await fetch(`/api/admin/orders/${orderId}`, {
         method: "PUT",
@@ -1026,9 +821,7 @@ export function Admin() {
   const handleDeleteOrder = async (id: string) => {
     setGenericConfirm({
       title: isRTL ? "حذف الطلب" : "Delete Order",
-      message: isRTL
-        ? "هل أنت متأكد من حذف هذا الطلب نهائياً؟"
-        : "Are you sure you want to delete this order permanently?",
+      message: isRTL ? "هل أنت متأكد من حذف هذا الطلب نهائياً؟" : "Are you sure you want to delete this order permanently?",
       isDangerous: true,
       onConfirm: async () => {
         try {
@@ -1039,20 +832,18 @@ export function Admin() {
           showNotification("error", "Failed to delete order");
         }
         setGenericConfirm(null);
-      },
+      }
     });
   };
 
   const convertMapsUrl = (url: string) => {
     if (!url) return "";
     if (url.includes("google.com/maps/embed")) return url;
-
+    
     // Check for "place" URLs
     const placeMatch = url.match(/\/place\/([^\/]+)/);
     if (placeMatch) {
-      const decodedPlace = decodeURIComponent(
-        placeMatch[1].replace(/\+/g, " "),
-      );
+      const decodedPlace = decodeURIComponent(placeMatch[1].replace(/\+/g, " "));
       return `https://www.google.com/maps?q=${encodeURIComponent(decodedPlace)}&output=embed`;
     }
 
@@ -1076,16 +867,16 @@ export function Admin() {
     setLoading(true);
     try {
       // Auto-convert map URLs for all branches
-      const finalBranches = (siteSettings.branches || []).map((b) => ({
+      const finalBranches = (siteSettings.branches || []).map(b => ({
         ...b,
-        mapUrl: b.mapUrl ? convertMapsUrl(b.mapUrl) : "",
+        mapUrl: b.mapUrl ? convertMapsUrl(b.mapUrl) : ""
       }));
 
       const finalSettings = {
         ...siteSettings,
-        branches: finalBranches,
+        branches: finalBranches
       };
-
+      
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -1104,15 +895,15 @@ export function Admin() {
 
   const addBranchArea = (branchId: string) => {
     if (!siteSettings) return;
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      const branches = (prev.branches || []).map((b) => {
+      const branches = (prev.branches || []).map(b => {
         if (b.id === branchId) {
           const newArea: Area = {
             id: Math.random().toString(36).substr(2, 9),
             name: "New Area",
             nameAr: "منطقة جديدة",
-            fee: b.deliveryFee || 0,
+            fee: b.deliveryFee || 0
           };
           return { ...b, areas: [...(b.areas || []), newArea] };
         }
@@ -1122,20 +913,13 @@ export function Admin() {
     });
   };
 
-  const updateBranchArea = (
-    branchId: string,
-    areaId: string,
-    field: string,
-    value: any,
-  ) => {
+  const updateBranchArea = (branchId: string, areaId: string, field: string, value: any) => {
     if (!siteSettings) return;
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      const branches = (prev.branches || []).map((b) => {
+      const branches = (prev.branches || []).map(b => {
         if (b.id === branchId) {
-          const areas = (b.areas || []).map((a) =>
-            a.id === areaId ? { ...a, [field]: value } : a,
-          );
+          const areas = (b.areas || []).map(a => a.id === areaId ? { ...a, [field]: value } : a);
           return { ...b, areas };
         }
         return b;
@@ -1146,14 +930,11 @@ export function Admin() {
 
   const removeBranchArea = (branchId: string, areaId: string) => {
     if (!siteSettings) return;
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      const branches = (prev.branches || []).map((b) => {
+      const branches = (prev.branches || []).map(b => {
         if (b.id === branchId) {
-          return {
-            ...b,
-            areas: (b.areas || []).filter((a) => a.id !== areaId),
-          };
+          return { ...b, areas: (b.areas || []).filter(a => a.id !== areaId) };
         }
         return b;
       });
@@ -1161,32 +942,18 @@ export function Admin() {
     });
   };
 
-  const translateAreaField = async (
-    branchId: string,
-    areaId: string,
-    field: "name",
-    toArabic: boolean,
-  ) => {
+  const translateAreaField = async (branchId: string, areaId: string, field: 'name', toArabic: boolean) => {
     if (!siteSettings) return;
-    const branch = siteSettings?.branches?.find((b) => b.id === branchId);
+    const branch = siteSettings?.branches?.find(b => b.id === branchId);
     if (!branch) return;
-    const area = branch?.areas?.find((a) => a.id === areaId);
+    const area = branch?.areas?.find(a => a.id === areaId);
     if (!area) return;
 
     const text = toArabic ? area.name : area.nameAr;
     if (!text) return;
-    const translated = await translateText(
-      text,
-      toArabic ? "en" : "ar",
-      toArabic ? "ar" : "en",
-    );
+    const translated = await translateText(text, toArabic ? 'en' : 'ar', toArabic ? 'ar' : 'en');
     if (translated) {
-      updateBranchArea(
-        branchId,
-        areaId,
-        toArabic ? "nameAr" : "name",
-        translated,
-      );
+      updateBranchArea(branchId, areaId, toArabic ? 'nameAr' : 'name', translated);
     }
   };
 
@@ -1202,22 +969,16 @@ export function Admin() {
       phones: [""],
       mapUrl: "",
       deliveryFee: siteSettings.defaultDeliveryFee || 0,
-      areas: [],
+      areas: []
     };
-    setSiteSettings((prev) =>
-      prev
-        ? { ...prev, branches: [...(prev.branches || []), newBranch] }
-        : prev,
-    );
-    setExpandedBranches((prev) => ({ ...prev, [newId]: true }));
+    setSiteSettings(prev => prev ? { ...prev, branches: [...(prev.branches || []), newBranch] } : prev);
+    setExpandedBranches(prev => ({ ...prev, [newId]: true }));
   };
 
   const updateBranch = (id: string, field: string, value: any) => {
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      const branches = (prev.branches || []).map((b) =>
-        b.id === id ? { ...b, [field]: value } : b,
-      );
+      const branches = (prev.branches || []).map(b => b.id === id ? { ...b, [field]: value } : b);
       return { ...prev, branches };
     });
   };
@@ -1226,42 +987,27 @@ export function Admin() {
     if (!siteSettings) return;
     setGenericConfirm({
       title: isRTL ? "حذف الفرع" : "Delete Branch",
-      message: isRTL
-        ? "هل أنت متأكد من حذف هذا الفرع؟"
-        : "Are you sure you want to delete this branch?",
+      message: isRTL ? "هل أنت متأكد من حذف هذا الفرع؟" : "Are you sure you want to delete this branch?",
       isDangerous: true,
       onConfirm: () => {
-        setSiteSettings((prev) =>
-          prev
-            ? {
-                ...prev,
-                branches: (prev.branches || []).filter((b) => b.id !== id),
-              }
-            : prev,
-        );
+        setSiteSettings(prev => prev ? { ...prev, branches: (prev.branches || []).filter(b => b.id !== id) } : prev);
         setGenericConfirm(null);
-      },
+      }
     });
   };
 
   const addBranchPhone = (branchId: string) => {
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      const branches = (prev.branches || []).map((b) =>
-        b.id === branchId ? { ...b, phones: [...b.phones, ""] } : b,
-      );
+      const branches = (prev.branches || []).map(b => b.id === branchId ? { ...b, phones: [...b.phones, ""] } : b);
       return { ...prev, branches };
     });
   };
 
-  const updateBranchPhone = (
-    branchId: string,
-    index: number,
-    value: string,
-  ) => {
-    setSiteSettings((prev) => {
+  const updateBranchPhone = (branchId: string, index: number, value: string) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      const branches = (prev.branches || []).map((b) => {
+      const branches = (prev.branches || []).map(b => {
         if (b.id === branchId) {
           const phones = [...b.phones];
           phones[index] = value;
@@ -1274,9 +1020,9 @@ export function Admin() {
   };
 
   const removeBranchPhone = (branchId: string, index: number) => {
-    setSiteSettings((prev) => {
+    setSiteSettings(prev => {
       if (!prev) return prev;
-      const branches = (prev.branches || []).map((b) => {
+      const branches = (prev.branches || []).map(b => {
         if (b.id === branchId) {
           return { ...b, phones: b.phones.filter((_, i) => i !== index) };
         }
@@ -1286,12 +1032,7 @@ export function Admin() {
     });
   };
 
-  const handleStatusChangeClick = (
-    orderId: string,
-    status: string,
-    currentStatus: string,
-    currentFee?: number,
-  ) => {
+  const handleStatusChangeClick = (orderId: string, status: string, currentStatus: string, currentFee?: number) => {
     if (currentStatus === "Completed") return;
     setConfirmStatus({ orderId, status });
     setDeliveryFeeUpdate(currentFee || 0);
@@ -1307,13 +1048,10 @@ export function Admin() {
       await fetch(`/api/admin/orders/${confirmStatus.orderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: confirmStatus.status,
+        body: JSON.stringify({ 
+          status: confirmStatus.status, 
           cancelReason,
-          deliveryFee:
-            confirmStatus.status === "Out for Delivery"
-              ? deliveryFeeUpdate
-              : undefined,
+          deliveryFee: confirmStatus.status === "Out for Delivery" ? deliveryFeeUpdate : undefined
         }),
       });
       fetchOrders();
@@ -1324,69 +1062,51 @@ export function Admin() {
     }
   };
 
-  const activeOrders = orders.filter(
-    (o) => o.status !== "Completed" && o.status !== "Cancelled",
-  );
-  const completedOrders = orders.filter((o) => o.status === "Completed");
-  const cancelledOrders = orders.filter((o) => o.status === "Cancelled");
+  const activeOrders = orders.filter(o => o.status !== "Completed" && o.status !== "Cancelled");
+  const completedOrders = orders.filter(o => o.status === "Completed");
+  const cancelledOrders = orders.filter(o => o.status === "Cancelled");
 
   if (!isLoggedIn) {
     return (
-      <div
-        className={cn(
-          "min-h-screen bg-black flex items-center justify-center p-4",
-        )}
-      >
-        <motion.div
+      <div className={cn("min-h-screen bg-black flex items-center justify-center p-4")}>
+        <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="w-full max-w-md bg-[#1A1A1A] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 border border-white/5 shadow-2xl flex flex-col"
         >
           <div className="text-center mb-8 md:mb-10">
             <div className="w-16 h-16 md:w-20 md:h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 glow-orange shadow-[0_0_50px_rgba(255,145,0,0.3)]">
-              <span className="text-black text-3xl md:text-5xl font-black italic tracking-tighter">
-                B
-              </span>
+              <span className="text-black text-3xl md:text-5xl font-black italic tracking-tighter">B</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-display font-black italic uppercase tracking-tighter">
-              Station <span className="text-primary">Admin</span>
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-display font-black italic uppercase tracking-tighter">Station <span className="text-primary">Admin</span></h1>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase opacity-40 ml-2">
-                  ID
-                </label>
-                <input
+                <label className="text-[10px] font-black uppercase opacity-40 ml-2">ID</label>
+                <input 
                   type="text"
                   required
                   value={adminId}
-                  onChange={(e) => setAdminId(e.target.value)}
+                  onChange={e => setAdminId(e.target.value)}
                   className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-6 font-mono focus:border-primary transition-all outline-none"
                   placeholder="Admin ID"
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase opacity-40 ml-2">
-                  {isRTL ? "كلمة المرور" : "Password"}
-                </label>
-                <input
+                <label className="text-[10px] font-black uppercase opacity-40 ml-2">{isRTL ? "كلمة المرور" : "Password"}</label>
+                <input 
                   type="password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-6 font-mono focus:border-primary transition-all outline-none text-center tracking-[0.5em]"
                   placeholder="••••••••"
                 />
               </div>
             </div>
-            {loginError && (
-              <p className="text-red-500 text-[10px] font-black uppercase text-center">
-                {loginError}
-              </p>
-            )}
+            {loginError && <p className="text-red-500 text-[10px] font-black uppercase text-center">{loginError}</p>}
             <button className="w-full h-16 bg-white text-black rounded-2xl font-black uppercase tracking-widest hover:bg-primary transition-all">
               Enter Station
             </button>
@@ -1397,25 +1117,15 @@ export function Admin() {
   }
 
   return (
-    <div
-      className={cn(
-        "min-h-screen bg-black text-white p-4 md:p-12 xl:p-16 2xl:p-24 3xl:p-32 font-sans pt-24 md:pt-32 overflow-x-hidden",
-        isRTL && "font-arabic",
-      )}
-    >
+    <div className={cn("min-h-screen bg-black text-white p-4 md:p-12 xl:p-16 2xl:p-24 3xl:p-32 font-sans pt-24 md:pt-32 overflow-x-hidden", isRTL && "font-arabic")}>
       <div className="max-w-screen-3xl mx-auto">
-        <header
-          className={cn(
-            "flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-12",
-            isRTL && "md:flex-row-reverse text-right",
-          )}
-        >
+        <header className={cn("flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 md:mb-12", isRTL && "md:flex-row-reverse text-right")}>
           <div>
             <h1 className="text-3xl md:text-4xl font-display font-black mb-2 italic uppercase tracking-tighter">
               {t.adminDashboard}
             </h1>
           </div>
-          <button
+          <button 
             onClick={handleLogout}
             className="flex items-center justify-center gap-2 bg-white/5 hover:bg-red-500/10 hover:text-red-500 px-6 py-4 md:py-3 rounded-xl transition-all font-black uppercase text-[10px] tracking-widest border border-white/10"
           >
@@ -1423,12 +1133,7 @@ export function Admin() {
           </button>
         </header>
 
-        <div
-          className={cn(
-            "flex gap-2 mb-8 md:mb-10 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 snap-x snap-mandatory",
-            isRTL && "flex-row-reverse",
-          )}
-        >
+        <div className={cn("flex gap-2 mb-8 md:mb-10 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 snap-x snap-mandatory", isRTL && "flex-row-reverse")}>
           {[
             { id: "menu", label: t.inventory, icon: Utensils },
             { id: "orders", label: t.missions, icon: Package },
@@ -1441,9 +1146,7 @@ export function Admin() {
               onClick={() => setActiveTab(tab.id as AdminTab)}
               className={cn(
                 "flex items-center gap-3 px-6 md:snap-align-none snap-center md:px-8 py-4 md:py-5 rounded-xl md:rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all border whitespace-nowrap",
-                activeTab === tab.id
-                  ? "bg-primary text-black border-primary"
-                  : "bg-white/5 text-white/40 border-white/5",
+                activeTab === tab.id ? "bg-primary text-black border-primary" : "bg-white/5 text-white/40 border-white/5"
               )}
             >
               <tab.icon size={16} />
@@ -1454,7 +1157,7 @@ export function Admin() {
 
         <div className="space-y-8">
           {activeTab === "menu" && (
-            <motion.div
+            <motion.div 
               key="menu"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1470,9 +1173,7 @@ export function Admin() {
                     onClick={() => setInventorySubTab(sub.id as any)}
                     className={cn(
                       "flex items-center gap-2 px-6 py-3 rounded-xl font-black uppercase text-[9px] tracking-widest transition-all border",
-                      inventorySubTab === sub.id
-                        ? "bg-white text-black border-white"
-                        : "bg-white/5 text-white/40 border-white/5",
+                      inventorySubTab === sub.id ? "bg-white text-black border-white" : "bg-white/5 text-white/40 border-white/5"
                     )}
                   >
                     <sub.icon size={12} />
@@ -1483,739 +1184,430 @@ export function Admin() {
 
               {inventorySubTab === "items" ? (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-                  <div className="lg:col-span-4 xl:col-span-3">
-                    <div className="bg-[#1A1A1A] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-white/5 sticky top-32">
-                      <h2 className="text-xl font-black italic uppercase mb-6">
-                        {editingItem ? t.editFuel : t.newFuel}
-                      </h2>
-                      <form
-                        onSubmit={handleSubmit}
-                        className="space-y-4 md:space-y-6"
-                      >
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <div
-                                className={cn(
-                                  "flex justify-between items-center",
-                                  isRTL && "flex-row-reverse",
-                                )}
-                              >
-                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                  {t.nameEn}
-                                </label>
-                                <button
-                                  type="button"
-                                  onClick={() => translateField("name", true)}
-                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                                >
-                                  <Languages size={8} /> {t.translate} AR
-                                </button>
-                              </div>
-                              <input
-                                placeholder={t.nameEn}
-                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all"
-                                value={formData.name}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    name: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <div
-                                className={cn(
-                                  "flex justify-between items-center",
-                                  isRTL && "flex-row-reverse",
-                                )}
-                              >
-                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                  {t.nameAr}
-                                </label>
-                                <button
-                                  type="button"
-                                  onClick={() => translateField("name", false)}
-                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                                >
-                                  <Languages size={8} /> {t.translate} EN
-                                </button>
-                              </div>
-                              <input
-                                placeholder={t.nameAr}
-                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all"
-                                value={formData.nameAr}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    nameAr: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-1">
-                              <div
-                                className={cn(
-                                  "flex justify-between items-center",
-                                  isRTL && "flex-row-reverse",
-                                )}
-                              >
-                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                  {t.descriptionEn}
-                                </label>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    translateField("description", true)
-                                  }
-                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                                >
-                                  <Languages size={8} /> {t.translate} AR
-                                </button>
-                              </div>
-                              <textarea
-                                placeholder={t.descriptionEn}
-                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
-                                value={formData.description}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    description: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                            <div className="space-y-1">
-                              <div
-                                className={cn(
-                                  "flex justify-between items-center",
-                                  isRTL && "flex-row-reverse",
-                                )}
-                              >
-                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                  {t.descriptionAr}
-                                </label>
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    translateField("description", false)
-                                  }
-                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                                >
-                                  <Languages size={8} /> {t.translate} EN
-                                </button>
-                              </div>
-                              <textarea
-                                placeholder={t.descriptionAr}
-                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
-                                value={formData.descriptionAr}
-                                onChange={(e) =>
-                                  setFormData({
-                                    ...formData,
-                                    descriptionAr: e.target.value,
-                                  })
-                                }
-                              />
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div
-                            className={cn(
-                              "flex items-center justify-between",
-                              isRTL && "flex-row-reverse",
-                            )}
-                          >
-                            <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40">
-                              {t.sizesAndVariants}
-                            </h4>
-                            <button
-                              type="button"
-                              onClick={addVariant}
-                              className="text-[10px] font-black uppercase text-primary hover:scale-110 transition-transform"
-                            >
-                              + {t.addSize}
+                <div className="lg:col-span-4 xl:col-span-3">
+                  <div className="bg-[#1A1A1A] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-white/5 sticky top-32">
+                  <h2 className="text-xl font-black italic uppercase mb-6">{editingItem ? t.editFuel : t.newFuel}</h2>
+                  <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                            <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.nameEn}</label>
+                            <button type="button" onClick={() => translateField('name', true)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
+                              <Languages size={8} /> {t.translate} AR
                             </button>
                           </div>
-
-                          <div className="space-y-2">
-                            {formData.variants.map((variant) => (
-                              <div
-                                key={variant.id}
-                                className={cn(
-                                  "grid grid-cols-12 gap-2 bg-white/5 p-3 rounded-xl border border-white/5 group",
-                                  isRTL && "flex-row-reverse",
-                                )}
-                              >
-                                <div className="col-span-4 relative group/v">
-                                  <input
-                                    placeholder={t.nameEn}
-                                    className="w-full bg-black/20 p-2 pr-8 rounded text-[10px] outline-none border border-transparent focus:border-primary/30"
-                                    value={variant.name}
-                                    onChange={(e) =>
-                                      updateVariant(
-                                        variant.id,
-                                        "name",
-                                        e.target.value,
-                                      )
-                                    }
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={async () => {
-                                      const translated = await translateText(
-                                        variant.name,
-                                        "en",
-                                        "ar",
-                                      );
-                                      if (translated)
-                                        updateVariant(
-                                          variant.id,
-                                          "nameAr",
-                                          translated,
-                                        );
-                                    }}
-                                    className="absolute right-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
-                                  >
-                                    <Languages size={10} />
-                                  </button>
-                                </div>
-                                <div className="col-span-4 relative group/v">
-                                  <input
-                                    placeholder={t.nameAr}
-                                    className="w-full bg-black/20 p-2 pl-8 rounded text-[10px] text-right outline-none border border-transparent focus:border-primary/30"
-                                    value={variant.nameAr}
-                                    onChange={(e) =>
-                                      updateVariant(
-                                        variant.id,
-                                        "nameAr",
-                                        e.target.value,
-                                      )
-                                    }
-                                  />
-                                  <button
-                                    type="button"
-                                    onClick={async () => {
-                                      const translated = await translateText(
-                                        variant.nameAr,
-                                        "ar",
-                                        "en",
-                                      );
-                                      if (translated)
-                                        updateVariant(
-                                          variant.id,
-                                          "name",
-                                          translated,
-                                        );
-                                    }}
-                                    className="absolute left-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
-                                  >
-                                    <Languages size={10} />
-                                  </button>
-                                </div>
-                                <input
-                                  type="number"
-                                  placeholder={t.egp}
-                                  className="col-span-3 bg-black/20 p-2 rounded text-[10px] outline-none"
-                                  value={variant.price}
-                                  onChange={(e) =>
-                                    updateVariant(
-                                      variant.id,
-                                      "price",
-                                      parseInt(e.target.value),
-                                    )
-                                  }
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => removeVariant(variant.id)}
-                                  className="col-span-1 flex items-center justify-center text-red-500 opacity-20 group-hover:opacity-100 transition-opacity"
-                                >
-                                  <X size={14} />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4">
-                          <div className="space-y-1">
-                            <label
-                              className={cn(
-                                "text-[8px] font-black uppercase opacity-40 mx-2 block",
-                                isRTL && "text-right",
-                              )}
-                            >
-                              {t.originalPrice}
-                            </label>
-                            <input
-                              type="number"
-                              placeholder="Price"
-                              className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm transition-all focus:border-primary"
-                              value={formData.price || ""}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  price: parseInt(e.target.value) || 0,
-                                })
-                              }
-                            />
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => setShowSale(!showSale)}
-                            className={cn(
-                              "w-full py-3 rounded-xl border flex items-center justify-center gap-2 text-[8px] font-black uppercase transition-all",
-                              showSale
-                                ? "bg-primary/20 border-primary text-primary"
-                                : "bg-white/5 border-white/10 text-white/40",
-                            )}
-                          >
-                            {showSale ? <Check size={10} /> : <Zap size={10} />}
-                            {isRTL
-                              ? "تفعيل العروض / الخصومات"
-                              : "Activate Sale / Offers"}
-                          </button>
-
-                          <AnimatePresence>
-                            {showSale && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: "auto", opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                className="overflow-hidden"
-                              >
-                                <div className="grid grid-cols-2 gap-4 pb-2">
-                                  <div className="space-y-1">
-                                    <label
-                                      className={cn(
-                                        "text-[8px] font-black uppercase opacity-40 mx-2 block",
-                                        isRTL && "text-right",
-                                      )}
-                                    >
-                                      {t.discountPercentage}
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="%"
-                                      className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
-                                      value={discountPercent || ""}
-                                      onChange={(e) =>
-                                        handlePercentChange(
-                                          parseInt(e.target.value) || 0,
-                                        )
-                                      }
-                                    />
-                                  </div>
-                                  <div className="space-y-1">
-                                    <label
-                                      className={cn(
-                                        "text-[8px] font-black uppercase opacity-40 mx-2 block",
-                                        isRTL && "text-right",
-                                      )}
-                                    >
-                                      {t.discountPrice}
-                                    </label>
-                                    <input
-                                      type="number"
-                                      placeholder="0 = No Sale"
-                                      className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
-                                      value={formData.discountPrice || ""}
-                                      onChange={(e) =>
-                                        setFormData({
-                                          ...formData,
-                                          discountPrice:
-                                            parseInt(e.target.value) || 0,
-                                        })
-                                      }
-                                    />
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                        <select
-                          className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm outline-none focus:border-primary transition-all"
-                          value={formData.category}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              category: e.target.value,
-                            })
-                          }
-                        >
-                          <option value="" disabled className="bg-[#1A1A1A]">
-                            {isRTL ? "اختر التصنيف" : "Select Category"}
-                          </option>
-                          {categories.map((cat) => (
-                            <option
-                              key={cat.slug}
-                              value={cat.slug}
-                              className="bg-[#1A1A1A]"
-                            >
-                              {isRTL ? cat.nameAr : cat.name}
-                            </option>
-                          ))}
-                        </select>
-                        <div
-                          className={cn(
-                            "flex items-center gap-4",
-                            isRTL && "flex-row-reverse",
-                          )}
-                        >
-                          <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
-                            {formData.image ? (
-                              <img
-                                src={formData.image}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <Camera className="opacity-20" />
-                            )}
-                            {uploading && (
-                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                                <RefreshCw
-                                  className="animate-spin text-primary"
-                                  size={20}
-                                />
-                              </div>
-                            )}
-                            <input
-                              type="file"
-                              className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-wait"
-                              disabled={uploading}
-                              onChange={handleImageUpload}
-                            />
-                          </div>
-                          <p className="text-[8px] uppercase font-black opacity-30">
-                            {isRTL ? "يفضل إضافة صورة" : "Image recommended"}
-                          </p>
-                        </div>
-                        <button
-                          type="submit"
-                          className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px]"
-                        >
-                          {editingItem ? t.editFuel : t.saveItem}
-                        </button>
-                        {editingItem && (
-                          <button
-                            type="button"
-                            onClick={resetForm}
-                            className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase"
-                          >
-                            {t.close}
-                          </button>
-                        )}
-                      </form>
-                    </div>
-                  </div>
-                  <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 md:gap-6">
-                    {items.map((item) => (
-                      <motion.div
-                        layout
-                        key={item._id}
-                        className="group bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 flex items-start sm:items-center gap-4 hover:border-primary/50 transition-all hover:bg-primary/5 cursor-pointer relative"
-                        onClick={() => handleEdit(item)}
-                      >
-                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-white/5 shrink-0">
-                          {item.image ? (
-                            <img
-                              src={item.image}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
-                          ) : null}
-                          {!item.isAvailable && (
-                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                              <span className="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-1 rounded">
-                                Out
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 flex flex-col justify-center">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[8px] font-black uppercase text-primary/40 leading-none">
-                              {item.category}
-                            </span>
-                            {item.isAvailable && (
-                              <span className="w-1 h-1 bg-green-500 rounded-full" />
-                            )}
-                          </div>
-                          <h4 className="font-black text-sm uppercase truncate mb-1 group-hover:text-primary transition-colors">
-                            {language === "ar" ? item.nameAr : item.name}
-                          </h4>
-                          <div className="flex items-center gap-2">
-                            {item.discountPrice !== undefined &&
-                            item.discountPrice > 0 ? (
-                              <>
-                                <div className="flex flex-col">
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-primary font-black italic text-base sm:text-lg leading-none">
-                                      {item.discountPrice}{" "}
-                                      <span className="text-[10px] uppercase not-italic opacity-40">
-                                        EGP
-                                      </span>
-                                    </p>
-                                    <span className="text-[7px] bg-primary text-black px-1.5 py-0.5 rounded-full font-black tracking-tighter">
-                                      SALE
-                                    </span>
-                                  </div>
-                                  <p className="text-white/20 line-through text-[10px] font-mono leading-none mt-1">
-                                    {item.price} EGP
-                                  </p>
-                                </div>
-                              </>
-                            ) : (
-                              <p className="text-primary font-black italic text-base sm:text-lg leading-none">
-                                {item.price}{" "}
-                                <span className="text-[10px] uppercase not-italic opacity-40">
-                                  EGP
-                                </span>
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex flex-row sm:flex-col gap-2 justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEdit(item);
-                            }}
-                            className="p-3 bg-white/5 hover:bg-primary hover:text-black rounded-xl transition-all"
-                            title="Edit"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteItem(item._id, item.imagePublicId);
-                            }}
-                            className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
-                            title="Delete"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-                  <div className="lg:col-span-4 xl:col-span-3">
-                    <div className="bg-[#1A1A1A] p-6 md:p-8 rounded-[2rem] border border-white/5 sticky top-32">
-                      <h2 className="text-xl font-black italic uppercase mb-6">
-                        {editingCategoryId ? t.editCategory : t.addCategory}
-                      </h2>
-                      <form
-                        onSubmit={handleSubmitCategory}
-                        className="space-y-4"
-                      >
-                        <div className="space-y-1">
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.categoryNameEn}
-                          </label>
-                          <input
-                            placeholder={t.categoryNameEn}
-                            className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
-                            value={categoryFormData.name}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setCategoryFormData({
-                                ...categoryFormData,
-                                name: val,
-                                slug: val.toLowerCase().replace(/\s+/g, "-"),
-                              });
-                            }}
+                          <input 
+                            placeholder={t.nameEn}
+                            className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all"
+                            value={formData.name}
+                            onChange={e => setFormData({...formData, name: e.target.value})}
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.categoryNameAr}
-                          </label>
-                          <input
-                            placeholder={t.categoryNameAr}
-                            className="w-full bg-white/5 p-4 rounded-xl text-sm text-right focus:border-primary outline-none transition-all"
-                            value={categoryFormData.nameAr}
-                            onChange={(e) =>
-                              setCategoryFormData({
-                                ...categoryFormData,
-                                nameAr: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.categorySlug}
-                          </label>
-                          <input
-                            placeholder="category-slug"
-                            className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
-                            value={categoryFormData.slug}
-                            onChange={(e) =>
-                              setCategoryFormData({
-                                ...categoryFormData,
-                                slug: e.target.value,
-                              })
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.categoryOrder}
-                          </label>
-                          <input
-                            type="number"
-                            placeholder="0"
-                            className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
-                            value={categoryFormData.order}
-                            onChange={(e) =>
-                              setCategoryFormData({
-                                ...categoryFormData,
-                                order: parseInt(e.target.value) || 0,
-                              })
-                            }
-                          />
-                        </div>
-                        <button
-                          type="submit"
-                          disabled={loading}
-                          className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
-                        >
-                          {loading ? (
-                            <RefreshCw
-                              className="animate-spin mx-auto"
-                              size={16}
-                            />
-                          ) : editingCategoryId ? (
-                            t.editCategory
-                          ) : (
-                            t.saveCategory
-                          )}
-                        </button>
-                        {editingCategoryId && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingCategoryId(null);
-                              setCategoryFormData({
-                                name: "",
-                                nameAr: "",
-                                slug: "",
-                                order: 0,
-                              });
-                            }}
-                            className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase"
-                          >
-                            {t.cancel}
-                          </button>
-                        )}
-                      </form>
-                    </div>
-                  </div>
-                  <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {categories.map((cat) => (
-                      <div
-                        key={cat._id}
-                        className="bg-[#1A1A1A] p-6 rounded-2xl border border-white/5 flex flex-col gap-4 relative group"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div
-                            className={cn(
-                              "flex flex-col",
-                              isRTL && "text-right",
-                            )}
-                          >
-                            <h3 className="font-black text-lg uppercase italic">
-                              {language === "ar" ? cat.nameAr : cat.name}
-                            </h3>
-                            <p className="text-[10px] font-mono opacity-20">
-                              {cat.slug}
-                            </p>
+                          <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                            <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.nameAr}</label>
+                            <button type="button" onClick={() => translateField('name', false)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
+                              <Languages size={8} /> {t.translate} EN
+                            </button>
                           </div>
-                          <div className="bg-primary/10 text-primary w-6 h-6 flex items-center justify-center rounded-lg text-[10px] font-black">
-                            {cat.order}
-                          </div>
-                        </div>
-                        <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg">
-                          <button
-                            onClick={() => {
-                              setEditingCategoryId(cat._id!);
-                              setCategoryFormData({
-                                name: cat.name,
-                                nameAr: cat.nameAr,
-                                slug: cat.slug,
-                                order: cat.order,
-                              });
-                            }}
-                            className="p-3 bg-white/5 hover:bg-primary hover:text-black rounded-xl transition-all"
-                          >
-                            <Edit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => deleteCategory(cat._id!)}
-                            className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          <input 
+                            placeholder={t.nameAr}
+                            className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all"
+                            value={formData.nameAr}
+                            onChange={e => setFormData({...formData, nameAr: e.target.value})}
+                          />
                         </div>
                       </div>
-                    ))}
-                  </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                            <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.descriptionEn}</label>
+                            <button type="button" onClick={() => translateField('description', true)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
+                              <Languages size={8} /> {t.translate} AR
+                            </button>
+                          </div>
+                          <textarea 
+                            placeholder={t.descriptionEn}
+                            className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
+                            value={formData.description}
+                            onChange={e => setFormData({...formData, description: e.target.value})}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                            <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.descriptionAr}</label>
+                            <button type="button" onClick={() => translateField('description', false)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
+                              <Languages size={8} /> {t.translate} EN
+                            </button>
+                          </div>
+                          <textarea 
+                            placeholder={t.descriptionAr}
+                            className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
+                            value={formData.descriptionAr}
+                            onChange={e => setFormData({...formData, descriptionAr: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className={cn("flex items-center justify-between", isRTL && "flex-row-reverse")}>
+                        <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40">{t.sizesAndVariants}</h4>
+                        <button 
+                          type="button"
+                          onClick={addVariant}
+                          className="text-[10px] font-black uppercase text-primary hover:scale-110 transition-transform"
+                        >
+                          + {t.addSize}
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {formData.variants.map((variant) => (
+                          <div key={variant.id} className={cn("grid grid-cols-12 gap-2 bg-white/5 p-3 rounded-xl border border-white/5 group", isRTL && "flex-row-reverse")}>
+                            <div className="col-span-4 relative group/v">
+                              <input 
+                                placeholder={t.nameEn}
+                                className="w-full bg-black/20 p-2 pr-8 rounded text-[10px] outline-none border border-transparent focus:border-primary/30"
+                                value={variant.name}
+                                onChange={e => updateVariant(variant.id, 'name', e.target.value)}
+                              />
+                              <button 
+                                type="button" 
+                                onClick={async () => {
+                                  const translated = await translateText(variant.name, 'en', 'ar');
+                                  if (translated) updateVariant(variant.id, 'nameAr', translated);
+                                }}
+                                className="absolute right-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
+                              >
+                                <Languages size={10} />
+                              </button>
+                            </div>
+                            <div className="col-span-4 relative group/v">
+                              <input 
+                                placeholder={t.nameAr}
+                                className="w-full bg-black/20 p-2 pl-8 rounded text-[10px] text-right outline-none border border-transparent focus:border-primary/30"
+                                value={variant.nameAr}
+                                onChange={e => updateVariant(variant.id, 'nameAr', e.target.value)}
+                              />
+                              <button 
+                                type="button" 
+                                onClick={async () => {
+                                  const translated = await translateText(variant.nameAr, 'ar', 'en');
+                                  if (translated) updateVariant(variant.id, 'name', translated);
+                                }}
+                                className="absolute left-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
+                              >
+                                <Languages size={10} />
+                              </button>
+                            </div>
+                            <input 
+                              type="number"
+                              placeholder={t.egp}
+                              className="col-span-3 bg-black/20 p-2 rounded text-[10px] outline-none"
+                              value={variant.price}
+                              onChange={e => updateVariant(variant.id, 'price', parseInt(e.target.value))}
+                            />
+                            <button 
+                              type="button"
+                              onClick={() => removeVariant(variant.id)}
+                              className="col-span-1 flex items-center justify-center text-red-500 opacity-20 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="space-y-1">
+                        <label className={cn("text-[8px] font-black uppercase opacity-40 mx-2 block", isRTL && "text-right")}>{t.originalPrice}</label>
+                        <input 
+                          type="number"
+                          placeholder="Price"
+                          className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm transition-all focus:border-primary"
+                          value={formData.price || ""}
+                          onChange={e => setFormData({...formData, price: parseInt(e.target.value) || 0})}
+                        />
+                      </div>
+
+                      <button 
+                        type="button" 
+                        onClick={() => setShowSale(!showSale)}
+                        className={cn(
+                          "w-full py-3 rounded-xl border flex items-center justify-center gap-2 text-[8px] font-black uppercase transition-all",
+                          showSale ? "bg-primary/20 border-primary text-primary" : "bg-white/5 border-white/10 text-white/40"
+                        )}
+                      >
+                        {showSale ? <Check size={10} /> : <Zap size={10} />}
+                        {isRTL ? "تفعيل العروض / الخصومات" : "Activate Sale / Offers"}
+                      </button>
+
+                      <AnimatePresence>
+                        {showSale && (
+                          <motion.div 
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="grid grid-cols-2 gap-4 pb-2">
+                              <div className="space-y-1">
+                                <label className={cn("text-[8px] font-black uppercase opacity-40 mx-2 block", isRTL && "text-right")}>{t.discountPercentage}</label>
+                                <input 
+                                  type="number"
+                                  placeholder="%"
+                                  className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
+                                  value={discountPercent || ""}
+                                  onChange={e => handlePercentChange(parseInt(e.target.value) || 0)}
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className={cn("text-[8px] font-black uppercase opacity-40 mx-2 block", isRTL && "text-right")}>{t.discountPrice}</label>
+                                <input 
+                                  type="number"
+                                  placeholder="0 = No Sale"
+                                  className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
+                                  value={formData.discountPrice || ""}
+                                  onChange={e => setFormData({...formData, discountPrice: parseInt(e.target.value) || 0})}
+                                />
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                    <select
+                      className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm outline-none focus:border-primary transition-all"
+                      value={formData.category}
+                      onChange={e => setFormData({...formData, category: e.target.value})}
+                    >
+                      <option value="" disabled className="bg-[#1A1A1A]">{isRTL ? "اختر التصنيف" : "Select Category"}</option>
+                      {categories.map(cat => (
+                        <option key={cat.slug} value={cat.slug} className="bg-[#1A1A1A]">
+                          {isRTL ? cat.nameAr : cat.name}
+                        </option>
+                      ))}
+                    </select>
+                    <div className={cn("flex items-center gap-4", isRTL && "flex-row-reverse")}>
+                      <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
+                        {formData.image ? (
+                          <img src={formData.image} className="w-full h-full object-cover" />
+                        ) : (
+                          <Camera className="opacity-20" />
+                        )}
+                        {uploading && (
+                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                            <RefreshCw className="animate-spin text-primary" size={20} />
+                          </div>
+                        )}
+                        <input 
+                          type="file" 
+                          className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-wait" 
+                          disabled={uploading}
+                          onChange={handleImageUpload} 
+                        />
+                      </div>
+                      <p className="text-[8px] uppercase font-black opacity-30">{isRTL ? "يفضل إضافة صورة" : "Image recommended"}</p>
+                    </div>
+                    <button type="submit" className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px]">
+                      {editingItem ? t.editFuel : t.saveItem}
+                    </button>
+                    {editingItem && (
+                      <button type="button" onClick={resetForm} className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase">
+                        {t.close}
+                      </button>
+                    )}
+                  </form>
                 </div>
-              )}
-            </motion.div>
+              </div>
+                <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 md:gap-6">
+                {items.map(item => (
+                  <motion.div 
+                    layout
+                    key={item._id} 
+                    className="group bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 flex items-start sm:items-center gap-4 hover:border-primary/50 transition-all hover:bg-primary/5 cursor-pointer relative"
+                    onClick={() => handleEdit(item)}
+                  >
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-white/5 shrink-0">
+                      {item.image ? (
+                        <img src={item.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      ) : null}
+                      {!item.isAvailable && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-1 rounded">Out</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 flex flex-col justify-center">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[8px] font-black uppercase text-primary/40 leading-none">{item.category}</span>
+                        {item.isAvailable && <span className="w-1 h-1 bg-green-500 rounded-full" />}
+                      </div>
+                      <h4 className="font-black text-sm uppercase truncate mb-1 group-hover:text-primary transition-colors">
+                        {language === "ar" ? item.nameAr : item.name}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        {item.discountPrice !== undefined && item.discountPrice > 0 ? (
+                          <>
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <p className="text-primary font-black italic text-base sm:text-lg leading-none">{item.discountPrice} <span className="text-[10px] uppercase not-italic opacity-40">EGP</span></p>
+                                <span className="text-[7px] bg-primary text-black px-1.5 py-0.5 rounded-full font-black tracking-tighter">SALE</span>
+                              </div>
+                              <p className="text-white/20 line-through text-[10px] font-mono leading-none mt-1">{item.price} EGP</p>
+                            </div>
+                          </>
+                        ) : (
+                          <p className="text-primary font-black italic text-base sm:text-lg leading-none">{item.price} <span className="text-[10px] uppercase not-italic opacity-40">EGP</span></p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-row sm:flex-col gap-2 justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                       <button 
+                        onClick={(e) => { e.stopPropagation(); handleEdit(item); }} 
+                        className="p-3 bg-white/5 hover:bg-primary hover:text-black rounded-xl transition-all"
+                        title="Edit"
+                       >
+                        <Edit2 size={14}/>
+                       </button>
+                       <button 
+                        onClick={(e) => { e.stopPropagation(); handleDeleteItem(item._id, item.imagePublicId); }} 
+                        className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                        title="Delete"
+                       >
+                        <Trash2 size={14}/>
+                       </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+              <div className="lg:col-span-4 xl:col-span-3">
+                <div className="bg-[#1A1A1A] p-6 md:p-8 rounded-[2rem] border border-white/5 sticky top-32">
+                  <h2 className="text-xl font-black italic uppercase mb-6">{editingCategoryId ? t.editCategory : t.addCategory}</h2>
+                  <form onSubmit={handleSubmitCategory} className="space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.categoryNameEn}</label>
+                      <input 
+                        placeholder={t.categoryNameEn}
+                        className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
+                        value={categoryFormData.name}
+                        onChange={e => {
+                          const val = e.target.value;
+                          setCategoryFormData({...categoryFormData, name: val, slug: val.toLowerCase().replace(/\s+/g, '-')});
+                        }}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.categoryNameAr}</label>
+                      <input 
+                        placeholder={t.categoryNameAr}
+                        className="w-full bg-white/5 p-4 rounded-xl text-sm text-right focus:border-primary outline-none transition-all"
+                        value={categoryFormData.nameAr}
+                        onChange={e => setCategoryFormData({...categoryFormData, nameAr: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.categorySlug}</label>
+                      <input 
+                        placeholder="category-slug"
+                        className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
+                        value={categoryFormData.slug}
+                        onChange={e => setCategoryFormData({...categoryFormData, slug: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.categoryOrder}</label>
+                      <input 
+                        type="number"
+                        placeholder="0"
+                        className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
+                        value={categoryFormData.order}
+                        onChange={e => setCategoryFormData({...categoryFormData, order: parseInt(e.target.value) || 0})}
+                      />
+                    </div>
+                    <button type="submit" disabled={loading} className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all">
+                      {loading ? <RefreshCw className="animate-spin mx-auto" size={16} /> : (editingCategoryId ? t.editCategory : t.saveCategory)}
+                    </button>
+                    {editingCategoryId && (
+                      <button 
+                        type="button" 
+                        onClick={() => { setEditingCategoryId(null); setCategoryFormData({ name: "", nameAr: "", slug: "", order: 0 }); }}
+                        className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase"
+                      >
+                        {t.cancel}
+                      </button>
+                    )}
+                  </form>
+                </div>
+              </div>
+              <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {categories.map(cat => (
+                  <div key={cat._id} className="bg-[#1A1A1A] p-6 rounded-2xl border border-white/5 flex flex-col gap-4 relative group">
+                    <div className="flex justify-between items-start">
+                      <div className={cn("flex flex-col", isRTL && "text-right")}>
+                        <h3 className="font-black text-lg uppercase italic">{language === 'ar' ? cat.nameAr : cat.name}</h3>
+                        <p className="text-[10px] font-mono opacity-20">{cat.slug}</p>
+                      </div>
+                      <div className="bg-primary/10 text-primary w-6 h-6 flex items-center justify-center rounded-lg text-[10px] font-black">
+                        {cat.order}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg">
+                      <button 
+                        onClick={() => {
+                          setEditingCategoryId(cat._id!);
+                          setCategoryFormData({
+                            name: cat.name,
+                            nameAr: cat.nameAr,
+                            slug: cat.slug,
+                            order: cat.order
+                          });
+                        }}
+                        className="p-3 bg-white/5 hover:bg-primary hover:text-black rounded-xl transition-all"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button 
+                        onClick={() => deleteCategory(cat._id!)}
+                        className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
+        </motion.div>
+      )}
 
           {activeTab === "orders" && (
-            <motion.div
-              key="orders"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="w-full space-y-10 md:space-y-16"
-            >
-              <div
-                className={cn(
-                  "flex flex-col sm:flex-row items-center gap-4 border-b border-white/5 pb-8",
-                  isRTL && "sm:flex-row-reverse",
-                )}
-              >
-                <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                  <Package className="text-black" size={24} />
-                </div>
-                <h2 className="text-3xl md:text-5xl font-display font-black italic uppercase tracking-tighter text-center sm:text-left">
-                  {t.missions}
-                </h2>
+            <motion.div key="orders" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full space-y-10 md:space-y-16">
+              <div className={cn("flex flex-col sm:flex-row items-center gap-4 border-b border-white/5 pb-8", isRTL && "sm:flex-row-reverse")}>
+                 <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                    <Package className="text-black" size={24} />
+                 </div>
+                 <h2 className="text-3xl md:text-5xl font-display font-black italic uppercase tracking-tighter text-center sm:text-left">
+                   {t.missions}
+                 </h2>
               </div>
 
               <section className="space-y-6">
                 <h2 className="text-xl font-black uppercase italic flex items-center gap-3">
-                  <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" />{" "}
-                  {t.activeMissions}
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse" /> {t.activeMissions}
                 </h2>
                 <div className="grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-4 md:gap-8">
-                  {activeOrders.length > 0 ? (
-                    activeOrders.map((order) => (
-                      <OrderCard
-                        key={order._id}
-                        order={order}
-                        onStatusChange={handleStatusChangeClick}
-                        onDelete={handleDeleteOrder}
-                        t={t}
-                        formatDate={formatDate}
-                        isRTL={isRTL}
-                      />
-                    ))
-                  ) : (
+                  {activeOrders.length > 0 ? activeOrders.map(order => (
+                    <OrderCard key={order._id} order={order} onStatusChange={handleStatusChangeClick} onDelete={handleDeleteOrder} t={t} formatDate={formatDate} isRTL={isRTL} />
+                  )) : (
                     <div className="col-span-full p-12 text-center border-2 border-dashed border-white/5 rounded-[2.5rem] text-white/20 font-black uppercase italic tracking-widest">
                       No Active Missions
                     </div>
@@ -2225,23 +1617,12 @@ export function Admin() {
 
               <section className="space-y-6">
                 <h2 className="text-xl font-black uppercase italic flex items-center gap-3">
-                  <Check className="text-green-500" size={20} />{" "}
-                  {t.completedMissions}
+                  <Check className="text-green-500" size={20} /> {t.completedMissions}
                 </h2>
                 <div className="grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-4 md:gap-8">
-                  {completedOrders.length > 0 ? (
-                    completedOrders.map((order) => (
-                      <OrderCard
-                        key={order._id}
-                        order={order}
-                        onStatusChange={handleStatusChangeClick}
-                        onDelete={handleDeleteOrder}
-                        t={t}
-                        formatDate={formatDate}
-                        isRTL={isRTL}
-                      />
-                    ))
-                  ) : (
+                  {completedOrders.length > 0 ? completedOrders.map(order => (
+                    <OrderCard key={order._id} order={order} onStatusChange={handleStatusChangeClick} onDelete={handleDeleteOrder} t={t} formatDate={formatDate} isRTL={isRTL} />
+                  )) : (
                     <div className="col-span-full p-8 text-center border border-white/5 rounded-[2rem] text-white/10 font-black uppercase italic text-xs">
                       No Completed Missions
                     </div>
@@ -2254,19 +1635,9 @@ export function Admin() {
                   <X size={20} /> {t.cancelled}
                 </h2>
                 <div className="grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-4 md:gap-8">
-                  {cancelledOrders.length > 0 ? (
-                    cancelledOrders.map((order) => (
-                      <OrderCard
-                        key={order._id}
-                        order={order}
-                        onStatusChange={handleStatusChangeClick}
-                        onDelete={handleDeleteOrder}
-                        t={t}
-                        formatDate={formatDate}
-                        isRTL={isRTL}
-                      />
-                    ))
-                  ) : (
+                  {cancelledOrders.length > 0 ? cancelledOrders.map(order => (
+                    <OrderCard key={order._id} order={order} onStatusChange={handleStatusChangeClick} onDelete={handleDeleteOrder} t={t} formatDate={formatDate} isRTL={isRTL} />
+                  )) : (
                     <div className="col-span-full p-8 text-center border border-white/5 rounded-[2rem] text-white/10 font-black uppercase italic text-xs">
                       No {t.cancelled} Orders
                     </div>
@@ -2278,43 +1649,27 @@ export function Admin() {
 
           {activeTab === "users" && (
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 3xl:grid-cols-7 gap-4 md:gap-6">
-              {customers.map((c) => (
-                <div
-                  key={c._id}
-                  className="bg-[#1A1A1A] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 hover:border-primary/20 transition-all"
-                >
-                  <h3 className="font-black text-lg md:text-xl italic uppercase mb-1 truncate">
-                    {c.name}
-                  </h3>
-                  <p className="text-primary font-mono mb-4 text-xs md:text-sm">
-                    {c.phone}
-                  </p>
-                  <p className="text-[10px] md:text-xs text-white/40 mb-3 italic line-clamp-2 min-h-[2.5rem]">
-                    {c.address}
-                  </p>
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                    <p className="text-[8px] font-mono opacity-20">
-                      {formatDate(c.updatedAt)}
-                    </p>
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-500/50 glow-green" />
-                  </div>
-                </div>
-              ))}
-              {customers.length === 0 && (
-                <div className="col-span-full p-20 text-center border-2 border-dashed border-white/5 rounded-[3rem] opacity-20 font-black uppercase italic tracking-[0.2em]">
-                  Empty Operator Database
-                </div>
-              )}
+               {customers.map(c => (
+                 <div key={c._id} className="bg-[#1A1A1A] p-6 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 hover:border-primary/20 transition-all">
+                   <h3 className="font-black text-lg md:text-xl italic uppercase mb-1 truncate">{c.name}</h3>
+                   <p className="text-primary font-mono mb-4 text-xs md:text-sm">{c.phone}</p>
+                   <p className="text-[10px] md:text-xs text-white/40 mb-3 italic line-clamp-2 min-h-[2.5rem]">{c.address}</p>
+                   <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                     <p className="text-[8px] font-mono opacity-20">{formatDate(c.updatedAt)}</p>
+                     <div className="w-1.5 h-1.5 rounded-full bg-green-500/50 glow-green" />
+                   </div>
+                 </div>
+               ))}
+               {customers.length === 0 && (
+                 <div className="col-span-full p-20 text-center border-2 border-dashed border-white/5 rounded-[3rem] opacity-20 font-black uppercase italic tracking-[0.2em]">
+                   Empty Operator Database
+                 </div>
+               )}
             </div>
           )}
 
           {activeTab === "offers" && (
-            <motion.div
-              key="offers"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-12"
-            >
+            <motion.div key="offers" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-12">
               <div className="xl:col-span-4 space-y-6">
                 <div className="bg-[#1A1A1A] p-6 md:p-8 rounded-[2rem] border border-white/5 space-y-6">
                   <div className="flex items-center gap-4 mb-2">
@@ -2322,247 +1677,86 @@ export function Admin() {
                       <Zap className="text-primary" size={24} />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-black italic uppercase tracking-tighter">
-                        {editingOfferId ? t.editOffer : t.newOffer}
-                      </h2>
-                      <p className="text-[10px] uppercase font-black opacity-30 mt-1">
-                        Create engaging promotional banners
-                      </p>
+                      <h2 className="text-2xl font-black italic uppercase tracking-tighter">{editingOfferId ? t.editOffer : t.newOffer}</h2>
+                      <p className="text-[10px] uppercase font-black opacity-30 mt-1">Create engaging promotional banners</p>
                     </div>
                   </div>
 
                   <form onSubmit={handleUpdateOffers} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <div
-                          className={cn(
-                            "flex justify-between items-center",
-                            isRTL && "flex-row-reverse",
-                          )}
-                        >
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.nameEn}
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => translateOfferField("title", true)}
-                            className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                          >
+                        <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.nameEn}</label>
+                          <button type="button" onClick={() => translateOfferField('title', true)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
                             <Languages size={8} /> {t.translate} AR
                           </button>
                         </div>
-                        <input
-                          placeholder={t.nameEn}
-                          className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
-                          value={offerFormData.title}
-                          onChange={(e) =>
-                            setOfferFormData({
-                              ...offerFormData,
-                              title: e.target.value,
-                            })
-                          }
-                        />
+                        <input placeholder={t.nameEn} className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all" value={offerFormData.title} onChange={e => setOfferFormData({...offerFormData, title: e.target.value})} />
                       </div>
                       <div className="space-y-1">
-                        <div
-                          className={cn(
-                            "flex justify-between items-center",
-                            isRTL && "flex-row-reverse",
-                          )}
-                        >
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.nameAr}
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => translateOfferField("title", false)}
-                            className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                          >
+                        <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.nameAr}</label>
+                          <button type="button" onClick={() => translateOfferField('title', false)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
                             <Languages size={8} /> {t.translate} EN
                           </button>
                         </div>
-                        <input
-                          placeholder={t.nameAr}
-                          className="w-full bg-white/5 p-4 rounded-xl text-sm text-right focus:border-primary outline-none transition-all"
-                          value={offerFormData.titleAr}
-                          onChange={(e) =>
-                            setOfferFormData({
-                              ...offerFormData,
-                              titleAr: e.target.value,
-                            })
-                          }
-                        />
+                        <input placeholder={t.nameAr} className="w-full bg-white/5 p-4 rounded-xl text-sm text-right focus:border-primary outline-none transition-all" value={offerFormData.titleAr} onChange={e => setOfferFormData({...offerFormData, titleAr: e.target.value})} />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <div
-                          className={cn(
-                            "flex justify-between items-center",
-                            isRTL && "flex-row-reverse",
-                          )}
-                        >
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.descriptionEn}
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              translateOfferField("description", true)
-                            }
-                            className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                          >
+                        <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.descriptionEn}</label>
+                          <button type="button" onClick={() => translateOfferField('description', true)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
                             <Languages size={8} /> {t.translate} AR
                           </button>
                         </div>
-                        <textarea
-                          placeholder={t.descriptionEn}
-                          className="w-full bg-white/5 p-4 rounded-xl text-sm min-h-[80px] focus:border-primary outline-none transition-all"
-                          value={offerFormData.description}
-                          onChange={(e) =>
-                            setOfferFormData({
-                              ...offerFormData,
-                              description: e.target.value,
-                            })
-                          }
-                        />
+                        <textarea placeholder={t.descriptionEn} className="w-full bg-white/5 p-4 rounded-xl text-sm min-h-[80px] focus:border-primary outline-none transition-all" value={offerFormData.description} onChange={e => setOfferFormData({...offerFormData, description: e.target.value})} />
                       </div>
                       <div className="space-y-1">
-                        <div
-                          className={cn(
-                            "flex justify-between items-center",
-                            isRTL && "flex-row-reverse",
-                          )}
-                        >
-                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                            {t.descriptionAr}
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              translateOfferField("description", false)
-                            }
-                            className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                          >
+                        <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">{t.descriptionAr}</label>
+                          <button type="button" onClick={() => translateOfferField('description', false)} className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all">
                             <Languages size={8} /> {t.translate} EN
                           </button>
                         </div>
-                        <textarea
-                          placeholder={t.descriptionAr}
-                          className="w-full bg-white/5 p-4 rounded-xl text-sm text-right min-h-[80px] focus:border-primary outline-none transition-all"
-                          value={offerFormData.descriptionAr}
-                          onChange={(e) =>
-                            setOfferFormData({
-                              ...offerFormData,
-                              descriptionAr: e.target.value,
-                            })
-                          }
-                        />
+                        <textarea placeholder={t.descriptionAr} className="w-full bg-white/5 p-4 rounded-xl text-sm text-right min-h-[80px] focus:border-primary outline-none transition-all" value={offerFormData.descriptionAr} onChange={e => setOfferFormData({...offerFormData, descriptionAr: e.target.value})} />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <select
+                      <select 
                         className="bg-white/5 p-4 rounded-xl text-sm outline-none border border-white/5 focus:border-primary"
                         value={offerFormData.type}
-                        onChange={(e) =>
-                          setOfferFormData({
-                            ...offerFormData,
-                            type: e.target.value as any,
-                          })
-                        }
+                        onChange={e => setOfferFormData({...offerFormData, type: e.target.value as any})}
                       >
-                        <option value="manual">
-                          {isRTL
-                            ? "يدوي (للمعرض فقط)"
-                            : "Manual (Display Only)"}
-                        </option>
-                        <option value="buy_x_get_y">
-                          {isRTL
-                            ? "اشترِ X واحصل على Y مجاناً"
-                            : "Buy X Get Y Free"}
-                        </option>
-                        <option value="fixed_discount">
-                          {isRTL ? "خصم ثابت" : "Fixed Discount"}
-                        </option>
-                        <option value="percentage_discount">
-                          {isRTL ? "خصم بنسبة مئوية" : "Percentage Discount"}
-                        </option>
+                        <option value="manual">{isRTL ? "يدوي (للمعرض فقط)" : "Manual (Display Only)"}</option>
+                        <option value="buy_x_get_y">{isRTL ? "اشترِ X واحصل على Y مجاناً" : "Buy X Get Y Free"}</option>
+                        <option value="fixed_discount">{isRTL ? "خصم ثابت" : "Fixed Discount"}</option>
+                        <option value="percentage_discount">{isRTL ? "خصم بنسبة مئوية" : "Percentage Discount"}</option>
                       </select>
-                      {offerFormData.type === "buy_x_get_y" && (
+                      {offerFormData.type === 'buy_x_get_y' && (
                         <div className="flex gap-2">
-                          <input
-                            type="number"
-                            placeholder="Buy X"
-                            className="bg-white/5 p-4 rounded-xl text-sm w-1/2"
-                            value={offerFormData.buyQuantity || ""}
-                            onChange={(e) =>
-                              setOfferFormData({
-                                ...offerFormData,
-                                buyQuantity: parseInt(e.target.value) || 0,
-                              })
-                            }
-                          />
-                          <input
-                            type="number"
-                            placeholder="Get Y Free"
-                            className="bg-white/5 p-4 rounded-xl text-sm w-1/2"
-                            value={offerFormData.getQuantity || ""}
-                            onChange={(e) =>
-                              setOfferFormData({
-                                ...offerFormData,
-                                getQuantity: parseInt(e.target.value) || 0,
-                              })
-                            }
-                          />
+                          <input type="number" placeholder="Buy X" className="bg-white/5 p-4 rounded-xl text-sm w-1/2" value={offerFormData.buyQuantity || ''} onChange={e => setOfferFormData({...offerFormData, buyQuantity: parseInt(e.target.value) || 0})} />
+                          <input type="number" placeholder="Get Y Free" className="bg-white/5 p-4 rounded-xl text-sm w-1/2" value={offerFormData.getQuantity || ''} onChange={e => setOfferFormData({...offerFormData, getQuantity: parseInt(e.target.value) || 0})} />
                         </div>
                       )}
-                      {(offerFormData.type === "fixed_discount" ||
-                        offerFormData.type === "percentage_discount") && (
-                        <input
-                          type="number"
-                          placeholder={
-                            offerFormData.type === "fixed_discount"
-                              ? "Discount Value (EGP)"
-                              : "Discount %"
-                          }
-                          className="bg-white/5 p-4 rounded-xl text-sm"
-                          value={offerFormData.discountValue || ""}
-                          onChange={(e) =>
-                            setOfferFormData({
-                              ...offerFormData,
-                              discountValue: parseInt(e.target.value) || 0,
-                            })
-                          }
-                        />
+                      {(offerFormData.type === 'fixed_discount' || offerFormData.type === 'percentage_discount') && (
+                        <input type="number" placeholder={offerFormData.type === 'fixed_discount' ? "Discount Value (EGP)" : "Discount %"} className="bg-white/5 p-4 rounded-xl text-sm" value={offerFormData.discountValue || ''} onChange={e => setOfferFormData({...offerFormData, discountValue: parseInt(e.target.value) || 0})} />
                       )}
                     </div>
 
-                    {offerFormData.type !== "manual" && (
+                    {offerFormData.type !== 'manual' && (
                       <div className="space-y-2">
-                        <label className="text-[10px] font-black uppercase opacity-40 ml-2">
-                          {isRTL
-                            ? "قصر العرض على صنف محدد (اختياري)"
-                            : "Limit to Category (Optional)"}
-                        </label>
+                        <label className="text-[10px] font-black uppercase opacity-40 ml-2">{isRTL ? "قصر العرض على صنف محدد (اختياري)" : "Limit to Category (Optional)"}</label>
                         <div className="flex flex-wrap gap-2">
                           {categories.map((cat) => (
                             <button
                               key={cat.slug}
                               type="button"
-                              onClick={() =>
-                                setOfferFormData({
-                                  ...offerFormData,
-                                  categoryLimit:
-                                    offerFormData.categoryLimit === cat.slug
-                                      ? undefined
-                                      : cat.slug,
-                                })
-                              }
+                              onClick={() => setOfferFormData({...offerFormData, categoryLimit: offerFormData.categoryLimit === cat.slug ? undefined : cat.slug})}
                               className={cn(
                                 "text-[10px] uppercase font-black px-4 py-2 rounded-lg border transition-all shadow-lg",
-                                offerFormData.categoryLimit === cat.slug
-                                  ? "bg-primary text-black border-primary"
-                                  : "bg-white/5 border-white/5 opacity-50 hover:opacity-100",
+                                offerFormData.categoryLimit === cat.slug ? "bg-primary text-black border-primary" : "bg-white/5 border-white/5 opacity-50 hover:opacity-100"
                               )}
                             >
                               {language === "ar" ? cat.nameAr : cat.name}
@@ -2574,94 +1768,58 @@ export function Admin() {
 
                     {/* Branch Selection */}
                     <div className="space-y-3 pt-2 border-t border-white/5">
-                      <div
-                        className={cn(
-                          "flex justify-between items-center",
-                          isRTL && "flex-row-reverse",
-                        )}
-                      >
+                      <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
                         <label className="text-[10px] font-black uppercase opacity-40 ml-2">
-                          {isRTL
-                            ? "الفروع المشمولة بالعرض"
-                            : "Applicable Branches"}
+                          {isRTL ? "الفروع المشمولة بالعرض" : "Applicable Branches"}
                         </label>
-                        <button
-                          type="button"
+                        <button 
+                          type="button" 
                           onClick={() => {
-                            const allBranchIds =
-                              siteSettings?.branches?.map((b) => b.id) || [];
+                            const allBranchIds = siteSettings?.branches?.map(b => b.id) || [];
                             const currentIds = offerFormData.branchIds || [];
                             if (currentIds.length === allBranchIds.length) {
-                              setOfferFormData({
-                                ...offerFormData,
-                                branchIds: [],
-                              });
+                              setOfferFormData({ ...offerFormData, branchIds: [] });
                             } else {
-                              setOfferFormData({
-                                ...offerFormData,
-                                branchIds: allBranchIds,
-                              });
+                              setOfferFormData({ ...offerFormData, branchIds: allBranchIds });
                             }
                           }}
                           className="text-[9px] font-black uppercase text-primary px-2 py-1 bg-primary/10 rounded transition-all hover:bg-primary hover:text-black"
                         >
-                          {(offerFormData.branchIds || []).length ===
-                          (siteSettings?.branches || []).length
-                            ? isRTL
-                              ? "إلغاء اختيار الكل"
-                              : "Deselect All"
-                            : isRTL
-                              ? "اختيار الكل"
-                              : "Select All"}
+                          {(offerFormData.branchIds || []).length === (siteSettings?.branches || []).length 
+                            ? (isRTL ? "إلغاء اختيار الكل" : "Deselect All") 
+                            : (isRTL ? "اختيار الكل" : "Select All")}
                         </button>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[150px] overflow-y-auto no-scrollbar p-1">
-                        {siteSettings?.branches?.map((branch) => (
-                          <label
-                            key={branch.id}
+                        {siteSettings?.branches?.map(branch => (
+                          <label 
+                            key={branch.id} 
                             className={cn(
                               "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all shrink-0",
-                              (offerFormData.branchIds || []).includes(
-                                branch.id,
-                              )
-                                ? "bg-primary/10 border-primary/50 text-foreground"
-                                : "bg-white/5 border-white/5 opacity-40 hover:opacity-100",
+                              (offerFormData.branchIds || []).includes(branch.id)
+                                ? "bg-primary/10 border-primary/50 text-foreground" 
+                                : "bg-white/5 border-white/5 opacity-40 hover:opacity-100"
                             )}
                           >
-                            <input
-                              type="checkbox"
-                              checked={(offerFormData.branchIds || []).includes(
-                                branch.id,
-                              )}
+                            <input 
+                              type="checkbox" 
+                              checked={(offerFormData.branchIds || []).includes(branch.id)}
                               onChange={() => {
-                                const currentIds =
-                                  offerFormData.branchIds || [];
+                                const currentIds = offerFormData.branchIds || [];
                                 if (currentIds.includes(branch.id)) {
-                                  setOfferFormData({
-                                    ...offerFormData,
-                                    branchIds: currentIds.filter(
-                                      (id) => id !== branch.id,
-                                    ),
-                                  });
+                                  setOfferFormData({ ...offerFormData, branchIds: currentIds.filter(id => id !== branch.id) });
                                 } else {
-                                  setOfferFormData({
-                                    ...offerFormData,
-                                    branchIds: [...currentIds, branch.id],
-                                  });
+                                  setOfferFormData({ ...offerFormData, branchIds: [...currentIds, branch.id] });
                                 }
                               }}
                               className="accent-primary"
                             />
                             <div className="flex flex-col">
                               <span className="text-[10px] font-black uppercase truncate">
-                                {language === "ar"
-                                  ? branch.nameAr
-                                  : branch.name}
+                                {language === "ar" ? branch.nameAr : branch.name}
                               </span>
                               <span className="text-[8px] opacity-40 truncate">
-                                {language === "ar"
-                                  ? branch.addressAr
-                                  : branch.address}
+                                {language === "ar" ? branch.addressAr : branch.address}
                               </span>
                             </div>
                           </label>
@@ -2669,10 +1827,7 @@ export function Admin() {
                       </div>
                       {(offerFormData.branchIds || []).length === 0 && (
                         <p className="text-[9px] text-red-500 font-black uppercase text-center mt-2 flex items-center justify-center gap-1">
-                          <AlertTriangle size={10} />{" "}
-                          {isRTL
-                            ? "يجب اختيار فرع واحد على الأقل"
-                            : "Select at least one branch"}
+                          <AlertTriangle size={10} /> {isRTL ? "يجب اختيار فرع واحد على الأقل" : "Select at least one branch"}
                         </p>
                       )}
                     </div>
@@ -2680,125 +1835,78 @@ export function Admin() {
                     <div className="flex items-center gap-4">
                       <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden shrink-0">
                         {offerFormData.image ? (
-                          <img
-                            src={offerFormData.image}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={offerFormData.image} className="w-full h-full object-cover" />
                         ) : (
                           <Camera size={24} className="opacity-20" />
                         )}
                         {uploading && (
                           <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <RefreshCw
-                              className="animate-spin text-primary"
-                              size={20}
-                            />
+                            <RefreshCw className="animate-spin text-primary" size={20} />
                           </div>
                         )}
-                        <input
-                          type="file"
-                          className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-wait"
+                        <input 
+                          type="file" 
+                          className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-wait" 
                           disabled={uploading}
                           onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (!file) return;
-
+                            
                             // Visual feedback: local preview
                             const reader = new FileReader();
                             reader.onloadend = () => {
-                              setOfferFormData((prev) => ({
-                                ...prev,
-                                image: reader.result as string,
-                              }));
+                              setOfferFormData(prev => ({ ...prev, image: reader.result as string }));
                             };
                             reader.readAsDataURL(file);
-
+                            
                             setUploading(true);
                             const uploadData = new FormData();
                             uploadData.append("image", file);
                             try {
-                              const res = await fetch("/api/admin/upload", {
-                                method: "POST",
-                                body: uploadData,
-                              });
+                              const res = await fetch("/api/admin/upload", { method: "POST", body: uploadData });
                               if (!res.ok) throw new Error("Upload failed");
                               const data = await res.json();
-                              setOfferFormData((prev) => ({
-                                ...prev,
-                                image: data.url,
-                                imagePublicId: data.public_id,
-                              }));
-                              showNotification(
-                                "success",
-                                isRTL
-                                  ? "تم رفع الصورة"
-                                  : "Image uploaded successfully",
-                              );
+                              setOfferFormData(prev => ({ ...prev, image: data.url, imagePublicId: data.public_id }));
+                              showNotification("success", isRTL ? "تم رفع الصورة" : "Image uploaded successfully");
                             } catch (err) {
-                              showNotification(
-                                "error",
-                                isRTL ? "فشل الرفع" : "Upload failed",
-                              );
-                            } finally {
-                              setUploading(false);
+                              showNotification("error", isRTL ? "فشل الرفع" : "Upload failed");
+                            } finally { 
+                              setUploading(false); 
                             }
-                          }}
+                          }} 
                         />
                       </div>
                       <div className="flex-1 space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={offerFormData.isActive}
-                            onChange={(e) =>
-                              setOfferFormData((prev) => ({
-                                ...prev,
-                                isActive: e.target.checked,
-                              }))
-                            }
-                            className="accent-primary"
-                          />
-                          <span className="text-[10px] uppercase font-black">
-                            {offerFormData.isActive ? t.active : t.inactive}
-                          </span>
+                          <input type="checkbox" checked={offerFormData.isActive} onChange={e => setOfferFormData(prev => ({...prev, isActive: e.target.checked}))} className="accent-primary" />
+                          <span className="text-[10px] uppercase font-black">{offerFormData.isActive ? t.active : t.inactive}</span>
                         </label>
-                        <p className="text-[8px] uppercase font-black opacity-30">
-                          Add a stunning banner image for this offer to show on
-                          home page
-                        </p>
+                        <p className="text-[8px] uppercase font-black opacity-30">Add a stunning banner image for this offer to show on home page</p>
                       </div>
                     </div>
-                    <button
-                      type="submit"
-                      className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px]"
-                    >
+                    <button type="submit" className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px]">
                       {editingOfferId ? t.saveOffer : t.addOffer}
                     </button>
                     {editingOfferId && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingOfferId(null);
-                          setOfferFormData({
-                            id: "",
-                            title: "",
-                            titleAr: "",
-                            description: "",
-                            descriptionAr: "",
-                            image: "",
-                            imagePublicId: "",
-                            isActive: true,
-                            type: "manual",
-                            buyQuantity: 0,
-                            getQuantity: 0,
-                            categoryLimit: undefined,
-                            discountValue: 0,
-                            branchIds:
-                              siteSettings?.branches?.map((b) => b.id) || [],
-                          });
-                        }}
-                        className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase"
-                      >
+                      <button type="button" onClick={() => { 
+                        setEditingOfferId(null); 
+                        setOfferFormData({ 
+                          id: "", 
+                          title: "", 
+                          titleAr: "", 
+                          description: "", 
+                          descriptionAr: "", 
+                          image: "", 
+                          imagePublicId: "", 
+                          isActive: true,
+                          type: 'manual',
+                          buyQuantity: 0,
+                          getQuantity: 0,
+                          categoryLimit: undefined,
+                          discountValue: 0,
+                          branchIds: siteSettings?.branches?.map(b => b.id) || []
+                        }); 
+                      }} className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase">
                         {t.cancel}
                       </button>
                     )}
@@ -2806,90 +1914,43 @@ export function Admin() {
                 </div>
 
                 <div className="bg-[#1A1A1A] p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40">
-                    {t.deliveryFeesConfig}
-                  </h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40">{t.deliveryFeesConfig}</h4>
                   <div className="bg-white/5 p-6 rounded-2xl border border-white/5 flex items-center justify-between">
                     <div className="space-y-1">
-                      <h4 className="font-black text-sm uppercase italic">
-                        {t.freeDelivery}
-                      </h4>
-                      <p className="text-[10px] opacity-40 uppercase font-black">
-                        {isRTL
-                          ? "تفعيل التوصيل المجاني تلقائياً"
-                          : "Enable free shipping automatic"}
-                      </p>
+                      <h4 className="font-black text-sm uppercase italic">{t.freeDelivery}</h4>
+                      <p className="text-[10px] opacity-40 uppercase font-black">{isRTL ? "تفعيل التوصيل المجاني تلقائياً" : "Enable free shipping automatic"}</p>
                     </div>
                     <div className="w-32">
-                      <input
-                        type="number"
-                        placeholder={t.total}
-                        className="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-xs font-mono text-center"
-                        value={siteSettings?.freeDeliveryThreshold || 0}
-                        onChange={(e) =>
-                          setSiteSettings((s) =>
-                            s
-                              ? {
-                                  ...s,
-                                  freeDeliveryThreshold:
-                                    parseInt(e.target.value) || 0,
-                                }
-                              : null,
-                          )
-                        }
-                      />
+                      <input type="number" placeholder={t.total} className="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-xs font-mono text-center" value={siteSettings?.freeDeliveryThreshold || 0} onChange={e => setSiteSettings(s => s ? {...s, freeDeliveryThreshold: parseInt(e.target.value) || 0} : null)} />
                     </div>
                   </div>
-                  <button
-                    onClick={handleUpdateSettings}
-                    className="w-full bg-white/10 py-3 rounded-xl font-black uppercase text-[8px]"
-                  >
-                    {t.saveSettings}
-                  </button>
+                  <button onClick={handleUpdateSettings} className="w-full bg-white/10 py-3 rounded-xl font-black uppercase text-[8px]">{t.saveSettings}</button>
                 </div>
               </div>
 
               <div className="xl:col-span-8 3xl:col-span-9 grid grid-cols-1 xl:grid-cols-2 3xl:grid-cols-3 gap-6 auto-rows-min max-h-[1200px] overflow-y-auto pr-2 no-scrollbar">
-                {siteSettings?.offers?.map((offer) => (
-                  <div
-                    key={offer.id}
-                    className="bg-[#1A1A1A] rounded-3xl border border-white/5 overflow-hidden group hover:border-primary/30 transition-all flex flex-col h-auto"
-                  >
+                {siteSettings?.offers?.map(offer => (
+                  <div key={offer.id} className="bg-[#1A1A1A] rounded-3xl border border-white/5 overflow-hidden group hover:border-primary/30 transition-all flex flex-col h-auto">
                     <div className="w-full aspect-video shrink-0 relative overflow-hidden">
                       {offer.image ? (
-                        <img
-                          src={offer.image}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        />
+                        <img src={offer.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                       ) : (
                         <div className="w-full h-full bg-white/5 flex items-center justify-center">
                           <Camera className="opacity-10" size={48} />
                         </div>
                       )}
-                      {!offer.isActive && (
-                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center font-black text-[10px] uppercase text-white/40">
-                          Inactive
-                        </div>
-                      )}
+                      {!offer.isActive && <div className="absolute inset-0 bg-black/60 flex items-center justify-center font-black text-[10px] uppercase text-white/40">Inactive</div>}
                     </div>
                     <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between">
                       <div>
-                        <h3 className="font-black text-2xl italic uppercase mb-2 line-clamp-1">
-                          {language === "ar" ? offer.titleAr : offer.title}
-                        </h3>
-                        <p className="text-white/40 text-xs line-clamp-2">
-                          {language === "ar"
-                            ? offer.descriptionAr
-                            : offer.description}
-                        </p>
-                        {offer.type && offer.type !== "manual" && (
+                        <h3 className="font-black text-2xl italic uppercase mb-2 line-clamp-1">{language === "ar" ? offer.titleAr : offer.title}</h3>
+                        <p className="text-white/40 text-xs line-clamp-2">{language === "ar" ? offer.descriptionAr : offer.description}</p>
+                        {offer.type && offer.type !== 'manual' && (
                           <div className="flex flex-wrap gap-2 mt-4">
                             <span className="text-[10px] font-black uppercase px-3 py-1.5 bg-primary/10 text-primary rounded-xl border border-primary/20 italic">
-                              {offer.type === "buy_x_get_y"
-                                ? `Buy ${offer.buyQuantity} Get ${offer.getQuantity} Free`
-                                : offer.type === "fixed_discount"
-                                  ? `${offer.discountValue} EGP OFF`
-                                  : `${offer.discountValue}% OFF`}
+                              {offer.type === 'buy_x_get_y' ? `Buy ${offer.buyQuantity} Get ${offer.getQuantity} Free` : 
+                               offer.type === 'fixed_discount' ? `${offer.discountValue} EGP OFF` : 
+                               `${offer.discountValue}% OFF`}
                             </span>
                             {offer.categoryLimit && (
                               <span className="text-[10px] font-black uppercase px-3 py-1.5 bg-white/5 text-white/40 rounded-xl border border-white/10">
@@ -2900,26 +1961,15 @@ export function Admin() {
                         )}
                       </div>
                       <div className="flex items-center gap-3 mt-8 pt-6 border-t border-white/5">
-                        <button
-                          onClick={() => handleEditOffer(offer)}
-                          className="flex-1 bg-white/5 hover:bg-primary hover:text-black py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleDeleteOffer(offer.id, offer.imagePublicId)
-                          }
-                          className="p-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all"
-                        >
+                        <button onClick={() => handleEditOffer(offer)} className="flex-1 bg-white/5 hover:bg-primary hover:text-black py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">Edit</button>
+                        <button onClick={() => handleDeleteOffer(offer.id, offer.imagePublicId)} className="p-4 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-2xl transition-all">
                           <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
                   </div>
                 ))}
-                {(!siteSettings?.offers ||
-                  siteSettings.offers.length === 0) && (
+                {(!siteSettings?.offers || siteSettings.offers.length === 0) && (
                   <div className="p-12 text-center border-2 border-dashed border-white/5 rounded-[2.5rem] text-white/20 font-black uppercase italic tracking-widest text-[10px]">
                     No Active Promotions
                   </div>
@@ -2929,809 +1979,337 @@ export function Admin() {
           )}
 
           {activeTab === "settings" && (
-            <motion.div
-              key="settings"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="w-full pb-24 sm:pb-20"
-            >
-              <form
-                onSubmit={handleUpdateSettings}
-                className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 2xl:gap-16 items-start"
-              >
+            <motion.div key="settings" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full pb-24 sm:pb-20">
+              <form onSubmit={handleUpdateSettings} className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 2xl:gap-16 items-start">
                 {/* Left Column: Core & Social */}
                 <div className="lg:col-span-7 xl:col-span-8 space-y-6 md:space-y-8 2xl:space-y-12">
                   <div className="bg-[#1A1A1A] p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-white/5 space-y-6">
-                    <h3
-                      className={cn(
-                        "text-lg sm:text-xl font-black italic uppercase flex items-center gap-3",
-                        isRTL && "flex-row-reverse",
-                      )}
-                    >
-                      <SettingsIcon size={20} className="text-primary" />{" "}
-                      {isRTL ? "الإعدادات الأساسية" : "Core Engine"}
+                    <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}>
+                      <SettingsIcon size={20} className="text-primary" /> {isRTL ? "الإعدادات الأساسية" : "Core Engine"}
                     </h3>
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
                         <div className="space-y-2">
-                          <div
-                            className={cn(
-                              "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                              isRTL && "sm:flex-row-reverse",
-                            )}
-                          >
-                            <label className="text-[10px] font-black uppercase opacity-40 italic">
-                              {t.storeName} (EN)
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => translateStoreName(true)}
+                          <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                            <label className="text-[10px] font-black uppercase opacity-40 italic">{t.storeName} (EN)</label>
+                            <button 
+                              type="button" 
+                              onClick={() => translateStoreName(true)} 
                               className="text-[9px] font-black uppercase text-primary px-3 py-2 sm:py-1 bg-primary/10 rounded-xl sm:rounded-full hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-1 border border-primary/20 sm:border-transparent"
                             >
-                              <Globe size={10} />{" "}
-                              {isRTL
-                                ? "ترجمة للعربية"
-                                : "Translate Store to Arabic"}
+                              <Globe size={10} /> {isRTL ? "ترجمة للعربية" : "Translate Store to Arabic"}
                             </button>
                           </div>
-                          <input
-                            className="w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all"
-                            value={siteSettings?.storeName || ""}
-                            onChange={(e) =>
-                              setSiteSettings((s) =>
-                                s ? { ...s, storeName: e.target.value } : null,
-                              )
-                            }
-                          />
+                          <input className="w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all" value={siteSettings?.storeName || ""} onChange={e => setSiteSettings(s => s ? {...s, storeName: e.target.value} : null)} />
                         </div>
                         <div className="space-y-2">
-                          <div
-                            className={cn(
-                              "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                              isRTL && "sm:flex-row-reverse",
-                            )}
-                          >
-                            <label className="text-[10px] font-black uppercase opacity-40 italic text-right block">
-                              {t.storeName} (AR)
-                            </label>
-                            <button
-                              type="button"
-                              onClick={() => translateStoreName(false)}
+                          <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                            <label className="text-[10px] font-black uppercase opacity-40 italic text-right block">{t.storeName} (AR)</label>
+                            <button 
+                              type="button" 
+                              onClick={() => translateStoreName(false)} 
                               className="text-[9px] font-black uppercase text-primary px-3 py-2 sm:py-1 bg-primary/10 rounded-xl sm:rounded-full hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-1 border border-primary/20 sm:border-transparent"
                             >
-                              <Globe size={10} />{" "}
-                              {isRTL
-                                ? "ترجمة للإنجليزية"
-                                : "Translate Store to English"}
+                              <Globe size={10} /> {isRTL ? "ترجمة للإنجليزية" : "Translate Store to English"}
                             </button>
                           </div>
-                          <input
+                          <input className={cn("w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all text-right")} dir="rtl" value={siteSettings?.storeNameAr || ""} onChange={e => setSiteSettings(s => s ? {...s, storeNameAr: e.target.value} : null)} />
+                        </div>
+                      </div>
+                    </div>
+
+                      <div className="space-y-4 pb-6 border-b border-white/5">
+                        <div className={cn("flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5", isRTL && "flex-row-reverse")}>
+                          <div>
+                            <p className="text-sm font-bold uppercase italic tracking-wider">{t.open24Hours}</p>
+                            <p className="text-[10px] opacity-40 uppercase font-black">{isRTL ? "تجاوز ساعات العمل المحددة" : "Override specific opening times"}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSiteSettings(s => s ? {...s, isOpen24Hours: !s.isOpen24Hours} : null)}
                             className={cn(
-                              "w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all text-right",
+                              "w-12 h-6 rounded-full p-1 transition-all relative overflow-hidden",
+                              siteSettings?.isOpen24Hours ? "bg-primary" : "bg-white/10"
                             )}
-                            dir="rtl"
-                            value={siteSettings?.storeNameAr || ""}
-                            onChange={(e) =>
-                              setSiteSettings((s) =>
-                                s
-                                  ? { ...s, storeNameAr: e.target.value }
-                                  : null,
-                              )
-                            }
-                          />
+                          >
+                            <motion.div 
+                              animate={{ x: siteSettings?.isOpen24Hours ? (isRTL ? -24 : 24) : 0 }}
+                              className="w-4 h-4 bg-white rounded-full shadow-lg"
+                            />
+                          </button>
                         </div>
-                      </div>
-                    </div>
 
-                    <div className="space-y-4 pb-6 border-b border-white/5">
-                      <div
-                        className={cn(
-                          "flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/5",
-                          isRTL && "flex-row-reverse",
+                        {!siteSettings?.isOpen24Hours && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
+                            <div className="space-y-2">
+                              <label className="text-[10px] font-black uppercase opacity-40 italic">{t.openingTime}</label>
+                              <input 
+                                placeholder="e.g. 11:00 AM" 
+                                className="w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all font-mono" 
+                                value={siteSettings?.openingTime || ""} 
+                                onChange={e => setSiteSettings(s => s ? {...s, openingTime: e.target.value} : null)} 
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className={cn("text-[10px] font-black uppercase opacity-40 italic", isRTL && "text-right block")}>{t.closingTime}</label>
+                              <input 
+                                placeholder="e.g. 02:00 AM" 
+                                className={cn("w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all font-mono", isRTL && "text-right")} 
+                                value={siteSettings?.closingTime || ""} 
+                                onChange={e => setSiteSettings(s => s ? {...s, closingTime: e.target.value} : null)} 
+                              />
+                            </div>
+                          </div>
                         )}
-                      >
-                        <div>
-                          <p className="text-sm font-bold uppercase italic tracking-wider">
-                            {t.open24Hours}
-                          </p>
-                          <p className="text-[10px] opacity-40 uppercase font-black">
-                            {isRTL
-                              ? "تجاوز ساعات العمل المحددة"
-                              : "Override specific opening times"}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSiteSettings((s) =>
-                              s
-                                ? { ...s, isOpen24Hours: !s.isOpen24Hours }
-                                : null,
-                            )
-                          }
-                          className={cn(
-                            "w-12 h-6 rounded-full p-1 transition-all relative overflow-hidden",
-                            siteSettings?.isOpen24Hours
-                              ? "bg-primary"
-                              : "bg-white/10",
-                          )}
-                        >
-                          <motion.div
-                            animate={{
-                              x: siteSettings?.isOpen24Hours
-                                ? isRTL
-                                  ? -24
-                                  : 24
-                                : 0,
-                            }}
-                            className="w-4 h-4 bg-white rounded-full shadow-lg"
-                          />
-                        </button>
                       </div>
 
-                      {!siteSettings?.isOpen24Hours && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-4">
-                          <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase opacity-40 italic">
-                              {t.openingTime}
-                            </label>
-                            <input
-                              placeholder="e.g. 11:00 AM"
-                              className="w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all font-mono"
-                              value={siteSettings?.openingTime || ""}
-                              onChange={(e) =>
-                                setSiteSettings((s) =>
-                                  s
-                                    ? { ...s, openingTime: e.target.value }
-                                    : null,
-                                )
-                              }
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label
-                              className={cn(
-                                "text-[10px] font-black uppercase opacity-40 italic",
-                                isRTL && "text-right block",
-                              )}
-                            >
-                              {t.closingTime}
-                            </label>
-                            <input
-                              placeholder="e.g. 02:00 AM"
-                              className={cn(
-                                "w-full bg-white/5 p-4 rounded-xl text-sm border border-white/5 focus:border-primary outline-none transition-all font-mono",
-                                isRTL && "text-right",
-                              )}
-                              value={siteSettings?.closingTime || ""}
-                              onChange={(e) =>
-                                setSiteSettings((s) =>
-                                  s
-                                    ? { ...s, closingTime: e.target.value }
-                                    : null,
-                                )
-                              }
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="pt-6 space-y-6 border-t border-white/5">
-                      <h3
-                        className={cn(
-                          "text-lg sm:text-xl font-black italic uppercase flex items-center gap-3",
-                          isRTL && "flex-row-reverse",
-                        )}
-                      >
-                        <Globe className="text-primary" size={20} />{" "}
-                        {t.socialMedia}
-                      </h3>
+                      <div className="pt-6 space-y-6 border-t border-white/5">
+                      <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}><Globe className="text-primary" size={20} /> {t.socialMedia}</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">
-                            Facebook
-                          </label>
-                          <input
-                            placeholder="Facebook URL"
-                            className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary"
-                            value={siteSettings?.socialLinks?.facebook || ""}
-                            onChange={(e) =>
-                              setSiteSettings((s) =>
-                                s
-                                  ? {
-                                      ...s,
-                                      socialLinks: {
-                                        ...(s.socialLinks || {}),
-                                        facebook: e.target.value,
-                                      },
-                                    }
-                                  : null,
-                              )
-                            }
-                          />
+                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">Facebook</label>
+                          <input placeholder="Facebook URL" className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary" value={siteSettings?.socialLinks?.facebook || ""} onChange={e => setSiteSettings(s => s ? {...s, socialLinks: {...(s.socialLinks || {}), facebook: e.target.value}} : null)} />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">
-                            Instagram
-                          </label>
-                          <input
-                            placeholder="Instagram URL"
-                            className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary"
-                            value={siteSettings?.socialLinks?.instagram || ""}
-                            onChange={(e) =>
-                              setSiteSettings((s) =>
-                                s
-                                  ? {
-                                      ...s,
-                                      socialLinks: {
-                                        ...(s.socialLinks || {}),
-                                        instagram: e.target.value,
-                                      },
-                                    }
-                                  : null,
-                              )
-                            }
-                          />
+                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">Instagram</label>
+                          <input placeholder="Instagram URL" className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary" value={siteSettings?.socialLinks?.instagram || ""} onChange={e => setSiteSettings(s => s ? {...s, socialLinks: {...(s.socialLinks || {}), instagram: e.target.value}} : null)} />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">
-                            WhatsApp
-                          </label>
-                          <input
-                            placeholder="WhatsApp Number"
-                            className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary"
-                            value={siteSettings?.socialLinks?.whatsapp || ""}
-                            onChange={(e) =>
-                              setSiteSettings((s) =>
-                                s
-                                  ? {
-                                      ...s,
-                                      socialLinks: {
-                                        ...(s.socialLinks || {}),
-                                        whatsapp: e.target.value,
-                                      },
-                                    }
-                                  : null,
-                              )
-                            }
-                          />
+                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">WhatsApp</label>
+                          <input placeholder="WhatsApp Number" className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary" value={siteSettings?.socialLinks?.whatsapp || ""} onChange={e => setSiteSettings(s => s ? {...s, socialLinks: {...(s.socialLinks || {}), whatsapp: e.target.value}} : null)} />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">
-                            TikTok
-                          </label>
-                          <input
-                            placeholder="TikTok URL"
-                            className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary"
-                            value={siteSettings?.socialLinks?.tiktok || ""}
-                            onChange={(e) =>
-                              setSiteSettings((s) =>
-                                s
-                                  ? {
-                                      ...s,
-                                      socialLinks: {
-                                        ...(s.socialLinks || {}),
-                                        tiktok: e.target.value,
-                                      },
-                                    }
-                                  : null,
-                              )
-                            }
-                          />
+                          <label className="text-[10px] sm:text-[8px] uppercase font-black opacity-30 sm:ml-2">TikTok</label>
+                          <input placeholder="TikTok URL" className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary" value={siteSettings?.socialLinks?.tiktok || ""} onChange={e => setSiteSettings(s => s ? {...s, socialLinks: {...(s.socialLinks || {}), tiktok: e.target.value}} : null)} />
                         </div>
                       </div>
                     </div>
 
                     <div className="bg-white/5 p-6 rounded-3xl space-y-4">
-                      <div
-                        className={cn(
-                          "flex justify-between items-center",
-                          isRTL && "flex-row-reverse",
-                        )}
-                      >
-                        <h3
-                          className={cn(
-                            "text-lg sm:text-xl font-black italic uppercase flex items-center gap-3",
-                            isRTL && "flex-row-reverse",
-                          )}
-                        >
-                          <Phone className="text-primary" size={20} />{" "}
-                          {isRTL ? "أرقام الخط الساخن" : "Hotline Numbers"}
+                      <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                        <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}>
+                          <Phone className="text-primary" size={20} /> {isRTL ? "أرقام الخط الساخن" : "Hotline Numbers"}
                         </h3>
-                        <button
-                          type="button"
-                          onClick={addHotlineNumber}
+                        <button 
+                          type="button" 
+                          onClick={addHotlineNumber} 
                           className="p-2 bg-primary text-black rounded-lg hover:scale-105 active:scale-95 transition-all"
                         >
                           <Plus size={16} />
                         </button>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {(siteSettings?.hotlineNumbers || []).map(
-                          (number, idx) => (
-                            <div key={idx} className="flex gap-2">
-                              <input
-                                placeholder={
-                                  isRTL ? "رقم الهاتف" : "Phone Number"
-                                }
-                                className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary font-mono"
-                                value={number}
-                                onChange={(e) =>
-                                  updateHotlineNumber(idx, e.target.value)
-                                }
-                              />
-                              <button
-                                type="button"
-                                onClick={() => removeHotlineNumber(idx)}
-                                className="p-4 text-red-500 bg-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95 shrink-0"
-                              >
-                                <X size={16} />
-                              </button>
-                            </div>
-                          ),
-                        )}
+                        {(siteSettings?.hotlineNumbers || []).map((number, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <input 
+                              placeholder={isRTL ? "رقم الهاتف" : "Phone Number"} 
+                              className="bg-white/5 p-4 rounded-xl text-sm w-full outline-none border border-white/5 focus:border-primary font-mono" 
+                              value={number} 
+                              onChange={e => updateHotlineNumber(idx, e.target.value)} 
+                            />
+                            <button 
+                              type="button" 
+                              onClick={() => removeHotlineNumber(idx)} 
+                              className="p-4 text-red-500 bg-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95 shrink-0"
+                            >
+                              <X size={16}/>
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-[#1A1A1A] p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-white/5 space-y-6">
-                    <div
-                      className={cn(
-                        "flex justify-between items-center",
-                        isRTL && "flex-row-reverse",
-                      )}
-                    >
-                      <h3
-                        className={cn(
-                          "text-lg sm:text-xl font-black italic uppercase flex items-center gap-3",
-                          isRTL && "flex-row-reverse",
-                        )}
-                      >
-                        <MapPin className="text-primary" size={20} />{" "}
-                        {t.locationConfig}
-                      </h3>
-                      <button
-                        type="button"
-                        onClick={addBranch}
-                        className="p-3 sm:p-2 bg-primary/10 text-primary rounded-xl hover:bg-primary hover:text-black transition-all"
-                      >
-                        <Plus size={16} />
+                    <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
+                      <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}><MapPin className="text-primary" size={20} /> {t.locationConfig}</h3>
+                      <button type="button" onClick={addBranch} className="p-3 sm:p-2 bg-primary/10 text-primary rounded-xl hover:bg-primary hover:text-black transition-all">
+                        <Plus size={16}/>
                       </button>
                     </div>
-
+                    
                     <div className="space-y-8">
                       {(siteSettings?.branches || []).map((branch) => (
-                        <div
-                          key={branch.id}
-                          className="p-6 bg-white/5 rounded-3xl border border-white/5 space-y-6 relative group transition-all hover:border-primary/20"
-                        >
-                          <div
-                            className={cn(
-                              "flex justify-between items-center",
-                              isRTL && "flex-row-reverse",
-                            )}
-                          >
+                        <div key={branch.id} className="p-6 bg-white/5 rounded-3xl border border-white/5 space-y-6 relative group transition-all hover:border-primary/20">
+                          <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
                             <div className="flex items-center gap-4">
-                              <button
+                              <button 
                                 type="button"
                                 onClick={() => toggleBranch(branch.id)}
                                 className="p-3 bg-white/5 hover:bg-primary/20 hover:text-primary rounded-xl transition-all"
                               >
-                                {expandedBranches[branch.id] ? (
-                                  <ChevronDown size={20} />
-                                ) : (
-                                  <ChevronRight
-                                    size={20}
-                                    className={isRTL ? "rotate-180" : ""}
-                                  />
-                                )}
+                                {expandedBranches[branch.id] ? <ChevronDown size={20} /> : <ChevronRight size={20} className={isRTL ? "rotate-180" : ""} />}
                               </button>
-                              <div
-                                className={isRTL ? "text-right" : "text-left"}
-                              >
+                              <div className={isRTL ? "text-right" : "text-left"}>
                                 <h3 className="font-black italic uppercase tracking-wider text-base text-white/90">
-                                  {language === "ar"
-                                    ? branch.nameAr ||
-                                      (isRTL ? "فرع جديد" : "New Branch")
-                                    : branch.name || "New Branch"}
+                                  {language === 'ar' ? (branch.nameAr || (isRTL ? "فرع جديد" : "New Branch")) : (branch.name || "New Branch")}
                                 </h3>
-                                <p className="text-[9px] opacity-30 font-mono tracking-tighter uppercase">
-                                  {branch.id}
-                                </p>
+                                <p className="text-[9px] opacity-30 font-mono tracking-tighter uppercase">{branch.id}</p>
                               </div>
                             </div>
-                            <button
-                              type="button"
-                              onClick={() => removeBranch(branch.id)}
-                              className="p-3 hover:bg-red-500/20 text-red-500 rounded-xl transition-all shadow-lg active:scale-90"
-                            >
+                            <button type="button" onClick={() => removeBranch(branch.id)} className="p-3 hover:bg-red-500/20 text-red-500 rounded-xl transition-all shadow-lg active:scale-90">
                               <Trash2 size={18} />
                             </button>
                           </div>
 
                           {expandedBranches[branch.id] && (
-                            <motion.div
+                            <motion.div 
                               initial={{ opacity: 0, scale: 0.98 }}
                               animate={{ opacity: 1, scale: 1 }}
                               className="space-y-8 pt-6 border-t border-white/5"
                             >
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <div
-                                    className={cn(
-                                      "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                                      isRTL && "sm:flex-row-reverse",
-                                    )}
-                                  >
-                                    <label className="text-[10px] uppercase font-black opacity-30 italic">
-                                      {t.branchNameEn}
-                                    </label>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        translateBranchField(
-                                          branch.id,
-                                          "name",
-                                          true,
-                                        )
-                                      }
+                                  <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                                    <label className="text-[10px] uppercase font-black opacity-30 italic">{t.branchNameEn}</label>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => translateBranchField(branch.id, 'name', true)} 
                                       className="text-[10px] font-black uppercase text-primary px-3 py-2 sm:py-1.5 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-2 border border-primary/20 w-full sm:w-auto"
                                     >
                                       <Languages size={12} /> {t.translate} AR
                                     </button>
                                   </div>
-                                  <input
-                                    className="w-full bg-black/40 p-4 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20"
-                                    value={branch.name}
-                                    onChange={(e) =>
-                                      updateBranch(
-                                        branch.id,
-                                        "name",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="e.g. Khalda Branch"
-                                  />
+                                  <input className="w-full bg-black/40 p-4 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20" value={branch.name} onChange={e => updateBranch(branch.id, 'name', e.target.value)} placeholder="e.g. Khalda Branch" />
                                 </div>
                                 <div className="space-y-2">
-                                  <div
-                                    className={cn(
-                                      "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                                      isRTL && "sm:flex-row-reverse",
-                                    )}
-                                  >
-                                    <label className="text-[10px] uppercase font-black opacity-30 italic text-right block">
-                                      {t.branchNameAr}
-                                    </label>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        translateBranchField(
-                                          branch.id,
-                                          "name",
-                                          false,
-                                        )
-                                      }
+                                  <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                                    <label className="text-[10px] uppercase font-black opacity-30 italic text-right block">{t.branchNameAr}</label>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => translateBranchField(branch.id, 'name', false)} 
                                       className="text-[10px] font-black uppercase text-primary px-3 py-2 sm:py-1.5 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-2 border border-primary/20 w-full sm:w-auto"
                                     >
                                       <Languages size={12} /> {t.translate} EN
                                     </button>
                                   </div>
-                                  <input
-                                    className="w-full bg-black/40 p-4 rounded-xl text-sm text-right outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20"
-                                    dir="rtl"
-                                    value={branch.nameAr}
-                                    onChange={(e) =>
-                                      updateBranch(
-                                        branch.id,
-                                        "nameAr",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="فرع خلدا"
-                                  />
+                                  <input className="w-full bg-black/40 p-4 rounded-xl text-sm text-right outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20" dir="rtl" value={branch.nameAr} onChange={e => updateBranch(branch.id, 'nameAr', e.target.value)} placeholder="فرع خلدا" />
                                 </div>
                               </div>
 
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <div
-                                    className={cn(
-                                      "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                                      isRTL && "sm:flex-row-reverse",
-                                    )}
-                                  >
-                                    <label className="text-[10px] uppercase font-black opacity-30 italic">
-                                      {t.branchAddressEn}
-                                    </label>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        translateBranchField(
-                                          branch.id,
-                                          "address",
-                                          true,
-                                        )
-                                      }
+                                  <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                                    <label className="text-[10px] uppercase font-black opacity-30 italic">{t.branchAddressEn}</label>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => translateBranchField(branch.id, 'address', true)} 
                                       className="text-[10px] font-black uppercase text-primary px-3 py-2 sm:py-1.5 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-2 border border-primary/20 w-full sm:w-auto"
                                     >
                                       <Languages size={12} /> {t.translate} AR
                                     </button>
                                   </div>
-                                  <input
-                                    className="w-full bg-black/40 p-4 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20"
-                                    value={branch.address}
-                                    onChange={(e) =>
-                                      updateBranch(
-                                        branch.id,
-                                        "address",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="e.g. King Abdullah St."
-                                  />
+                                  <input className="w-full bg-black/40 p-4 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20" value={branch.address} onChange={e => updateBranch(branch.id, 'address', e.target.value)} placeholder="e.g. King Abdullah St." />
                                 </div>
                                 <div className="space-y-2">
-                                  <div
-                                    className={cn(
-                                      "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                                      isRTL && "sm:flex-row-reverse",
-                                    )}
-                                  >
-                                    <label className="text-[10px] uppercase font-black opacity-30 italic text-right block">
-                                      {t.branchAddressAr}
-                                    </label>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        translateBranchField(
-                                          branch.id,
-                                          "address",
-                                          false,
-                                        )
-                                      }
+                                  <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                                    <label className="text-[10px] uppercase font-black opacity-30 italic text-right block">{t.branchAddressAr}</label>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => translateBranchField(branch.id, 'address', false)} 
                                       className="text-[10px] font-black uppercase text-primary px-3 py-2 sm:py-1.5 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-2 border border-primary/20 w-full sm:w-auto"
                                     >
                                       <Languages size={12} /> {t.translate} EN
                                     </button>
                                   </div>
-                                  <input
-                                    className="w-full bg-black/40 p-4 rounded-xl text-sm text-right outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20"
-                                    dir="rtl"
-                                    value={branch.addressAr}
-                                    onChange={(e) =>
-                                      updateBranch(
-                                        branch.id,
-                                        "addressAr",
-                                        e.target.value,
-                                      )
-                                    }
-                                    placeholder="شارع الملك عبدالله"
-                                  />
+                                  <input className="w-full bg-black/40 p-4 rounded-xl text-sm text-right outline-none border border-white/10 focus:border-primary transition-all shadow-inner placeholder:opacity-20" dir="rtl" value={branch.addressAr} onChange={e => updateBranch(branch.id, 'addressAr', e.target.value)} placeholder="شارع الملك عبدالله" />
                                 </div>
                               </div>
 
                               <div className="space-y-4">
-                                <div
-                                  className={cn(
-                                    "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                                    isRTL && "sm:flex-row-reverse",
-                                  )}
-                                >
-                                  <label className="text-[10px] uppercase font-black opacity-30 italic">
-                                    {t.branchPhone}
-                                  </label>
-                                  <button
-                                    type="button"
-                                    onClick={() => addBranchPhone(branch.id)}
-                                    className="text-[10px] font-black uppercase text-primary px-4 py-2 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all border border-primary/20 w-full sm:w-auto"
-                                  >
-                                    + {isRTL ? "أضف رقم" : "Add Phone"}
-                                  </button>
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                                  {(branch.phones || []).map((phone, idx) => (
-                                    <div key={idx} className="flex gap-2">
-                                      <input
-                                        className="flex-1 bg-black/40 p-4 rounded-xl text-sm font-mono outline-none border border-white/10 focus:border-primary transition-all"
-                                        value={phone}
-                                        onChange={(e) =>
-                                          updateBranchPhone(
-                                            branch.id,
-                                            idx,
-                                            e.target.value,
-                                          )
-                                        }
-                                        placeholder="+962..."
-                                      />
-                                      {(branch.phones || []).length > 1 && (
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            removeBranchPhone(branch.id, idx)
-                                          }
-                                          className="p-4 text-red-500 bg-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95 shrink-0"
-                                        >
-                                          <X size={16} />
-                                        </button>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
+                                 <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                                   <label className="text-[10px] uppercase font-black opacity-30 italic">{t.branchPhone}</label>
+                                   <button 
+                                     type="button" 
+                                     onClick={() => addBranchPhone(branch.id)} 
+                                     className="text-[10px] font-black uppercase text-primary px-4 py-2 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all border border-primary/20 w-full sm:w-auto"
+                                   >
+                                     + {isRTL ? "أضف رقم" : "Add Phone"}
+                                   </button>
+                                 </div>
+                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                   {(branch.phones || []).map((phone, idx) => (
+                                     <div key={idx} className="flex gap-2">
+                                       <input 
+                                         className="flex-1 bg-black/40 p-4 rounded-xl text-sm font-mono outline-none border border-white/10 focus:border-primary transition-all" 
+                                         value={phone} 
+                                         onChange={e => updateBranchPhone(branch.id, idx, e.target.value)} 
+                                         placeholder="+962..." 
+                                       />
+                                       {(branch.phones || []).length > 1 && (
+                                         <button 
+                                           type="button" 
+                                           onClick={() => removeBranchPhone(branch.id, idx)} 
+                                           className="p-4 text-red-500 bg-red-500/10 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95 shrink-0"
+                                         >
+                                           <X size={16}/>
+                                         </button>
+                                       )}
+                                     </div>
+                                   ))}
+                                 </div>
                               </div>
 
                               <div className="space-y-2">
-                                <label className="text-[10px] uppercase font-black opacity-30 italic">
-                                  {t.googleMapsUrl}
-                                </label>
-                                <input
-                                  className="w-full bg-black/40 p-4 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all font-mono placeholder:opacity-20"
-                                  value={branch.mapUrl}
-                                  onChange={(e) =>
-                                    updateBranch(
-                                      branch.id,
-                                      "mapUrl",
-                                      e.target.value,
-                                    )
-                                  }
-                                  placeholder="https://www.google.com/maps/embed?pb=..."
-                                />
+                                <label className="text-[10px] uppercase font-black opacity-30 italic">{t.googleMapsUrl}</label>
+                                <input className="w-full bg-black/40 p-4 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all font-mono placeholder:opacity-20" value={branch.mapUrl} onChange={e => updateBranch(branch.id, 'mapUrl', e.target.value)} placeholder="https://www.google.com/maps/embed?pb=..." />
                               </div>
 
                               <div className="pt-8 border-t border-white/5 space-y-6">
-                                <div
-                                  className={cn(
-                                    "flex justify-between items-center",
-                                    isRTL && "flex-row-reverse",
-                                  )}
-                                >
+                                <div className={cn("flex justify-between items-center", isRTL && "flex-row-reverse")}>
                                   <h4 className="text-[12px] font-black uppercase italic tracking-widest text-primary flex items-center gap-2">
                                     <Package size={14} /> {t.manageAreas}
                                   </h4>
-                                  <button
-                                    type="button"
-                                    onClick={() => addBranchArea(branch.id)}
-                                    className="text-[11px] font-black bg-primary text-black px-6 py-3 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,145,0,0.3)]"
-                                  >
-                                    <Plus size={16} className="inline mr-2" />{" "}
-                                    {t.addArea}
+                                  <button type="button" onClick={() => addBranchArea(branch.id)} className="text-[11px] font-black bg-primary text-black px-6 py-3 rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,145,0,0.3)]">
+                                    <Plus size={16} className="inline mr-2" /> {t.addArea}
                                   </button>
                                 </div>
 
                                 <div className="space-y-6">
                                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                      <label className="text-[10px] uppercase font-black opacity-30 italic px-2">
-                                        {t.branchDefaultFee}
-                                      </label>
-                                      <input
-                                        className="w-full bg-black/40 p-4 rounded-xl text-sm font-mono outline-none border border-white/10 focus:border-primary transition-all"
-                                        value={branch.deliveryFee || 0}
-                                        onChange={(e) =>
-                                          updateBranch(
-                                            branch.id,
-                                            "deliveryFee",
-                                            parseInt(e.target.value) || 0,
-                                          )
-                                        }
-                                      />
+                                      <label className="text-[10px] uppercase font-black opacity-30 italic px-2">{t.branchDefaultFee}</label>
+                                      <input className="w-full bg-black/40 p-4 rounded-xl text-sm font-mono outline-none border border-white/10 focus:border-primary transition-all" value={branch.deliveryFee || 0} onChange={e => updateBranch(branch.id, 'deliveryFee', parseInt(e.target.value) || 0)} />
                                     </div>
                                   </div>
 
                                   <div className="grid grid-cols-1 gap-4">
                                     {(branch.areas || []).map((area) => (
-                                      <div
-                                        key={area.id}
-                                        className="p-6 bg-white/5 rounded-[2rem] border border-white/5 space-y-4 relative group/area hover:border-primary/30 transition-all shadow-xl"
-                                      >
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            removeBranchArea(branch.id, area.id)
-                                          }
+                                      <div key={area.id} className="p-6 bg-white/5 rounded-[2rem] border border-white/5 space-y-4 relative group/area hover:border-primary/30 transition-all shadow-xl">
+                                        <button 
+                                          type="button" 
+                                          onClick={() => removeBranchArea(branch.id, area.id)}
                                           className="absolute top-4 right-4 text-red-500 opacity-0 group-hover/area:opacity-100 transition-all p-3 hover:bg-red-500/10 rounded-xl"
                                         >
                                           <X size={18} />
                                         </button>
-
+                                        
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                           <div className="space-y-2">
-                                            <div
-                                              className={cn(
-                                                "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                                                isRTL && "sm:flex-row-reverse",
-                                              )}
-                                            >
-                                              <label className="text-[10px] uppercase font-black opacity-30 italic">
-                                                {t.areaNameEn}
-                                              </label>
-                                              <button
-                                                type="button"
-                                                onClick={() =>
-                                                  translateAreaField(
-                                                    branch.id,
-                                                    area.id,
-                                                    "name",
-                                                    true,
-                                                  )
-                                                }
+                                            <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                                              <label className="text-[10px] uppercase font-black opacity-30 italic">{t.areaNameEn}</label>
+                                              <button 
+                                                type="button" 
+                                                onClick={() => translateAreaField(branch.id, area.id, 'name', true)} 
                                                 className="text-[10px] font-black uppercase text-primary px-3 py-2 sm:py-1.5 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-2 border border-primary/20 w-full sm:w-auto"
-                                              >
-                                                <Languages size={10} />{" "}
-                                                {t.translate} AR
-                                              </button>
+                                              ><Languages size={10} /> {t.translate} AR</button>
                                             </div>
-                                            <input
-                                              className="w-full bg-black/20 p-3.5 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all"
-                                              value={area.name}
-                                              onChange={(e) =>
-                                                updateBranchArea(
-                                                  branch.id,
-                                                  area.id,
-                                                  "name",
-                                                  e.target.value,
-                                                )
-                                              }
-                                            />
+                                            <input className="w-full bg-black/20 p-3.5 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all" value={area.name} onChange={e => updateBranchArea(branch.id, area.id, 'name', e.target.value)} />
                                           </div>
                                           <div className="space-y-2">
-                                            <div
-                                              className={cn(
-                                                "flex flex-col sm:flex-row justify-between sm:items-center gap-2",
-                                                isRTL && "sm:flex-row-reverse",
-                                              )}
-                                            >
-                                              <label className="text-[10px] uppercase font-black opacity-30 italic">
-                                                {t.areaNameAr}
-                                              </label>
-                                              <button
-                                                type="button"
-                                                onClick={() =>
-                                                  translateAreaField(
-                                                    branch.id,
-                                                    area.id,
-                                                    "name",
-                                                    false,
-                                                  )
-                                                }
+                                            <div className={cn("flex flex-col sm:flex-row justify-between sm:items-center gap-2", isRTL && "sm:flex-row-reverse")}>
+                                              <label className="text-[10px] uppercase font-black opacity-30 italic">{t.areaNameAr}</label>
+                                              <button 
+                                                type="button" 
+                                                onClick={() => translateAreaField(branch.id, area.id, 'name', false)} 
                                                 className="text-[10px] font-black uppercase text-primary px-3 py-2 sm:py-1.5 bg-primary/10 rounded-xl hover:bg-primary hover:text-black transition-all flex items-center justify-center gap-2 border border-primary/20 w-full sm:w-auto"
-                                              >
-                                                <Languages size={10} />{" "}
-                                                {t.translate} EN
-                                              </button>
+                                              ><Languages size={10} /> {t.translate} EN</button>
                                             </div>
-                                            <input
-                                              className="w-full bg-black/20 p-3.5 rounded-xl text-sm text-right outline-none border border-white/10 focus:border-primary transition-all"
-                                              dir="rtl"
-                                              value={area.nameAr}
-                                              onChange={(e) =>
-                                                updateBranchArea(
-                                                  branch.id,
-                                                  area.id,
-                                                  "nameAr",
-                                                  e.target.value,
-                                                )
-                                              }
-                                            />
+                                            <input className="w-full bg-black/20 p-3.5 rounded-xl text-sm text-right outline-none border border-white/10 focus:border-primary transition-all" dir="rtl" value={area.nameAr} onChange={e => updateBranchArea(branch.id, area.id, 'nameAr', e.target.value)} />
                                           </div>
                                           <div className="space-y-2">
-                                            <label className="text-[10px] uppercase font-black opacity-30 block italic">
-                                              {t.areaFee}
-                                            </label>
-                                            <input
-                                              type="number"
-                                              className="w-full bg-black/20 p-3.5 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all font-mono"
-                                              value={area.fee || 0}
-                                              onChange={(e) =>
-                                                updateBranchArea(
-                                                  branch.id,
-                                                  area.id,
-                                                  "fee",
-                                                  parseInt(e.target.value) || 0,
-                                                )
-                                              }
-                                            />
+                                            <label className="text-[10px] uppercase font-black opacity-30 block italic">{t.areaFee}</label>
+                                            <input type="number" className="w-full bg-black/20 p-3.5 rounded-xl text-sm outline-none border border-white/10 focus:border-primary transition-all font-mono" value={area.fee || 0} onChange={e => updateBranchArea(branch.id, area.id, 'fee', parseInt(e.target.value) || 0)} />
                                           </div>
                                         </div>
                                       </div>
@@ -3750,78 +2328,41 @@ export function Admin() {
                 {/* Right Column: Featured & Delivery */}
                 <div className="lg:col-span-5 xl:col-span-4 space-y-6 md:space-y-8 2xl:space-y-12">
                   <div className="bg-[#1A1A1A] p-5 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-white/5 space-y-6 sticky lg:top-24">
-                    <h3
-                      className={cn(
-                        "text-lg sm:text-xl font-black italic uppercase flex items-center gap-3",
-                        isRTL && "flex-row-reverse",
-                      )}
-                    >
-                      <Utensils className="text-primary" size={20} />{" "}
-                      {isRTL ? "الساندوتش المميز" : "Hero Sandwich"}
-                    </h3>
+                    <h3 className={cn("text-lg sm:text-xl font-black italic uppercase flex items-center gap-3", isRTL && "flex-row-reverse")}><Utensils className="text-primary" size={20} /> {isRTL ? "الساندوتش المميز" : "Hero Sandwich"}</h3>
                     <div className="space-y-4">
-                      <label
-                        className={cn(
-                          "text-[10px] font-black uppercase opacity-40 block",
-                          isRTL && "text-right",
-                        )}
-                      >
-                        Select Hero Sandwich
-                      </label>
+                      <label className={cn("text-[10px] font-black uppercase opacity-40 block", isRTL && "text-right")}>Select Hero Sandwich</label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 2xl:grid-cols-2 gap-3 max-h-[350px] sm:max-h-[400px] lg:max-h-[500px] xl:max-h-[600px] overflow-y-auto p-2 no-scrollbar">
-                        {items
-                          .filter((item) => item.category === "Burger")
-                          .map((item) => (
-                            <div
-                              key={item._id}
-                              onClick={() =>
-                                setSiteSettings((s) =>
-                                  s ? { ...s, featuredItemId: item._id } : null,
-                                )
-                              }
-                              className={cn(
-                                "flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all shrink-0 hover:scale-[1.02] active:scale-95",
-                                siteSettings?.featuredItemId === item._id
-                                  ? "bg-primary/20 border-primary shadow-[0_0_20px_rgba(255,145,0,0.15)]"
-                                  : "bg-white/5 border-white/5 hover:border-primary/30",
-                              )}
-                            >
-                              {item.image ? (
-                                <img
-                                  src={item.image}
-                                  className="w-10 h-10 rounded-lg object-cover"
-                                />
-                              ) : null}
-                              <div className="min-w-0 flex-1">
-                                <p className="font-black text-[10px] uppercase truncate">
-                                  {language === "ar" ? item.nameAr : item.name}
-                                </p>
-                                <p className="text-[8px] opacity-40 italic truncate">
-                                  {item.category}
-                                </p>
-                              </div>
-                              {siteSettings?.featuredItemId === item._id && (
-                                <Check
-                                  size={12}
-                                  className="ml-auto text-primary shrink-0"
-                                />
-                              )}
+                        {items.filter(item => item.category === "Burger").map(item => (
+                          <div 
+                            key={item._id}
+                            onClick={() => setSiteSettings(s => s ? {...s, featuredItemId: item._id} : null)}
+                            className={cn(
+                              "flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all shrink-0 hover:scale-[1.02] active:scale-95",
+                              siteSettings?.featuredItemId === item._id 
+                                ? "bg-primary/20 border-primary shadow-[0_0_20px_rgba(255,145,0,0.15)]" 
+                                : "bg-white/5 border-white/5 hover:border-primary/30"
+                            )}
+                          >
+                            {item.image ? (
+                              <img src={item.image} className="w-10 h-10 rounded-lg object-cover" />
+                            ) : null}
+                            <div className="min-w-0 flex-1">
+                              <p className="font-black text-[10px] uppercase truncate">{language === "ar" ? item.nameAr : item.name}</p>
+                              <p className="text-[8px] opacity-40 italic truncate">{item.category}</p>
                             </div>
-                          ))}
+                            {siteSettings?.featuredItemId === item._id && <Check size={12} className="ml-auto text-primary shrink-0" />}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
+
                 </div>
 
                 {/* Submit button spans full width on desktop */}
                 <div className="lg:col-span-12 pt-4">
-                  <button
-                    type="submit"
-                    className="w-full bg-primary text-black h-16 sm:h-20 rounded-2xl sm:rounded-[2.5rem] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 text-sm sm:text-base"
-                  >
-                    {loading ? (
-                      <RefreshCw className="animate-spin" />
-                    ) : (
+                  <button type="submit" className="w-full bg-primary text-black h-16 sm:h-20 rounded-2xl sm:rounded-[2.5rem] font-black uppercase tracking-[0.2em] shadow-2xl shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-3 text-sm sm:text-base">
+                    {loading ? <RefreshCw className="animate-spin" /> : (
                       <>
                         <Save size={20} />
                         {t.saveSettings}
@@ -3837,89 +2378,39 @@ export function Admin() {
         <AnimatePresence>
           {confirmStatus && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-[#1A1A1A] p-10 rounded-[3rem] border border-white/10 w-full max-w-sm text-center"
-              >
-                <h3 className="text-2xl font-black uppercase italic mb-4">
-                  {t.areYouSure}
-                </h3>
-                <p className="text-white/40 text-sm mb-8">
-                  {t.confirmStatusChange}{" "}
-                  <span className="text-primary">
-                    "{getStatusTranslation(confirmStatus.status)}"
-                  </span>
-                </p>
-
+              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-[#1A1A1A] p-10 rounded-[3rem] border border-white/10 w-full max-w-sm text-center">
+                <h3 className="text-2xl font-black uppercase italic mb-4">{t.areYouSure}</h3>
+                <p className="text-white/40 text-sm mb-8">{t.confirmStatusChange} <span className="text-primary">"{getStatusTranslation(confirmStatus.status)}"</span></p>
+                
                 {confirmStatus.status === "Out for Delivery" && (
-                  <div
-                    className={cn(
-                      "mb-8 space-y-2",
-                      isRTL ? "text-right" : "text-left",
-                    )}
-                  >
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">
-                      {t.deliveryFee}
-                    </label>
-                    <input
+                  <div className={cn("mb-8 space-y-2", isRTL ? "text-right" : "text-left")}>
+                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">{t.deliveryFee}</label>
+                    <input 
                       type="number"
                       className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-6 font-mono outline-none focus:border-primary transition-colors"
                       value={deliveryFeeUpdate}
-                      onChange={(e) =>
-                        setDeliveryFeeUpdate(parseInt(e.target.value) || 0)
-                      }
+                      onChange={e => setDeliveryFeeUpdate(parseInt(e.target.value) || 0)}
                     />
-                    <p className="text-[8px] opacity-30 uppercase font-black px-2 mt-1">
-                      {isRTL
-                        ? "تحديد المبلغ النهائي للتوصيل لهذا الموقع"
-                        : "Set final delivery amount for this location"}
-                    </p>
+                    <p className="text-[8px] opacity-30 uppercase font-black px-2 mt-1">{isRTL ? "تحديد المبلغ النهائي للتوصيل لهذا الموقع" : "Set final delivery amount for this location"}</p>
                   </div>
                 )}
 
                 {confirmStatus.status === "Cancelled" && (
-                  <div
-                    className={cn(
-                      "mb-8 space-y-2",
-                      isRTL ? "text-right" : "text-left",
-                    )}
-                  >
-                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">
-                      {t.cancelReason}
-                    </label>
-                    <textarea
+                  <div className={cn("mb-8 space-y-2", isRTL ? "text-right" : "text-left")}>
+                    <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-2">{t.cancelReason}</label>
+                    <textarea 
                       className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-red-500/50 transition-colors resize-none"
                       rows={3}
                       value={cancelReason}
-                      onChange={(e) => setCancelReason(e.target.value)}
+                      onChange={e => setCancelReason(e.target.value)}
                       placeholder={t.provideReason}
                     />
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => {
-                      setConfirmStatus(null);
-                      setCancelReason("");
-                    }}
-                    className="py-4 bg-white/5 rounded-xl font-black uppercase text-[10px]"
-                  >
-                    {t.cancel}
-                  </button>
-                  <button
-                    onClick={confirmStatusChange}
-                    className={cn(
-                      "py-4 rounded-xl font-black uppercase text-[10px]",
-                      confirmStatus.status === "Cancelled"
-                        ? "bg-red-500 text-white"
-                        : "bg-white text-black",
-                    )}
-                  >
-                    {t.confirm}
-                  </button>
+                  <button onClick={() => { setConfirmStatus(null); setCancelReason(""); }} className="py-4 bg-white/5 rounded-xl font-black uppercase text-[10px]">{t.cancel}</button>
+                  <button onClick={confirmStatusChange} className={cn("py-4 rounded-xl font-black uppercase text-[10px]", confirmStatus.status === "Cancelled" ? "bg-red-500 text-white" : "bg-white text-black")}>{t.confirm}</button>
                 </div>
               </motion.div>
             </div>
@@ -3929,44 +2420,16 @@ export function Admin() {
         <AnimatePresence>
           {genericConfirm && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-[#1A1A1A] p-10 rounded-[2.5rem] border border-white/10 w-full max-w-sm text-center"
-              >
+              <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-[#1A1A1A] p-10 rounded-[2.5rem] border border-white/10 w-full max-w-sm text-center">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <AlertTriangle
-                    className={cn(
-                      "text-primary",
-                      genericConfirm.isDangerous && "text-red-500",
-                    )}
-                    size={32}
-                  />
+                  <AlertTriangle className={cn("text-primary", genericConfirm.isDangerous && "text-red-500")} size={32} />
                 </div>
-                <h3 className="text-2xl font-black uppercase italic mb-2 tracking-tighter">
-                  {genericConfirm.title}
-                </h3>
-                <p className="text-white/40 text-sm mb-8">
-                  {genericConfirm.message}
-                </p>
-
+                <h3 className="text-2xl font-black uppercase italic mb-2 tracking-tighter">{genericConfirm.title}</h3>
+                <p className="text-white/40 text-sm mb-8">{genericConfirm.message}</p>
+                
                 <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setGenericConfirm(null)}
-                    className="py-4 bg-white/5 rounded-xl font-black uppercase text-[10px] hover:bg-white/10 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={genericConfirm.onConfirm}
-                    className={cn(
-                      "py-4 rounded-xl font-black uppercase text-[10px] transition-all glow-orange-sm",
-                      genericConfirm.isDangerous
-                        ? "bg-red-500 text-white"
-                        : "bg-white text-black",
-                    )}
-                  >
+                  <button onClick={() => setGenericConfirm(null)} className="py-4 bg-white/5 rounded-xl font-black uppercase text-[10px] hover:bg-white/10 transition-colors">Cancel</button>
+                  <button onClick={genericConfirm.onConfirm} className={cn("py-4 rounded-xl font-black uppercase text-[10px] transition-all glow-orange-sm", genericConfirm.isDangerous ? "bg-red-500 text-white" : "bg-white text-black")}>
                     Confirm
                   </button>
                 </div>
@@ -3979,217 +2442,96 @@ export function Admin() {
   );
 }
 
-function OrderCard({
-  order,
-  onStatusChange,
-  onDelete,
-  t,
-  formatDate,
-  isRTL,
-}: any) {
+function OrderCard({ order, onStatusChange, onDelete, t, formatDate, isRTL }: any) {
   const statusMap: Record<string, string> = {
-    Pending: t.pending || "Pending",
-    Preparing: t.preparing || "Preparing",
+    "Pending": t.pending || "Pending",
+    "Preparing": t.preparing || "Preparing",
     "Out for Delivery": t.outForDelivery || "Out for Delivery",
-    Completed: t.completed || "Completed",
-    Cancelled: t.cancelled || "Cancelled",
+    "Completed": t.completed || "Completed",
+    "Cancelled": t.cancelled || "Cancelled"
   };
 
   return (
-    <div
-      className={cn(
-        "bg-[#1A1A1A] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-white/5 group relative",
-        isRTL && "text-right",
-      )}
-    >
-      <div
-        className={cn(
-          "flex flex-col lg:flex-row justify-between gap-8",
-          isRTL && "lg:flex-row-reverse",
-        )}
-      >
+    <div className={cn("bg-[#1A1A1A] p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-white/5 group relative", isRTL && "text-right")}>
+      <div className={cn("flex flex-col lg:flex-row justify-between gap-8", isRTL && "lg:flex-row-reverse")}>
         <div className="flex-1 space-y-6">
-          <div
-            className={cn(
-              "flex flex-wrap gap-2 md:gap-3",
-              isRTL && "flex-row-reverse",
-            )}
-          >
-            <span className="bg-white/5 px-3 md:px-4 py-2 rounded-lg text-xs md:text-[10px] font-mono opacity-60">
-              #{order._id.slice(-6).toUpperCase()}
-            </span>
-            <span className="bg-white/5 px-3 md:px-4 py-2 rounded-lg text-xs md:text-[10px] font-mono opacity-60">
-              {formatDate(order.createdAt)}
-            </span>
-            <span
-              className={cn(
-                "px-3 md:px-4 py-2 rounded-full text-xs md:text-[10px] font-black uppercase",
-                order.status === "Pending"
-                  ? "bg-yellow-500/10 text-yellow-500"
-                  : "bg-primary/10 text-primary",
-              )}
-            >
+          <div className={cn("flex flex-wrap gap-2 md:gap-3", isRTL && "flex-row-reverse")}>
+            <span className="bg-white/5 px-3 md:px-4 py-2 rounded-lg text-xs md:text-[10px] font-mono opacity-60">#{order._id.slice(-6).toUpperCase()}</span>
+            <span className="bg-white/5 px-3 md:px-4 py-2 rounded-lg text-xs md:text-[10px] font-mono opacity-60">{formatDate(order.createdAt)}</span>
+            <span className={cn("px-3 md:px-4 py-2 rounded-full text-xs md:text-[10px] font-black uppercase", order.status === "Pending" ? "bg-yellow-500/10 text-yellow-500" : "bg-primary/10 text-primary")}>
               {statusMap[order.status] || order.status}
             </span>
           </div>
           <div>
             <h4 className="text-xl md:text-2xl font-black italic uppercase mb-1 flex flex-wrap items-center gap-2">
               {order.customerName}
-              {order.status === "Cancelled" && (
-                <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded not-italic whitespace-nowrap">
-                  {t.cancelled}
-                </span>
-              )}
+              {order.status === "Cancelled" && <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded not-italic whitespace-nowrap">{t.cancelled}</span>}
             </h4>
-            <p className="text-primary font-mono text-sm md:text-base">
-              {order.phone}
-            </p>
+            <p className="text-primary font-mono text-sm md:text-base">{order.phone}</p>
             <div className="mt-2 space-y-1">
               <p className="text-xs text-white/40 italic flex items-start md:items-center gap-2">
                 <MapPin size={10} className="text-primary mt-1 md:mt-0" />
-                <span className="flex-1 line-clamp-2 md:line-clamp-none">
-                  {order.address}
-                </span>
+                <span className="flex-1 line-clamp-2 md:line-clamp-none">{order.address}</span>
               </p>
-              <div
-                className={cn(
-                  "flex flex-wrap gap-2",
-                  isRTL && "flex-row-reverse",
-                )}
-              >
+              <div className={cn("flex flex-wrap gap-2", isRTL && "flex-row-reverse")}>
                 <p className="text-[9px] md:text-[10px] font-black uppercase text-primary/60 px-3 md:px-4 py-1 bg-primary/5 rounded-full inline-block">
-                  {isRTL
-                    ? order.branchNameAr || order.branchName
-                    : order.branchName || order.branchNameAr}
+                  {isRTL ? (order.branchNameAr || order.branchName) : (order.branchName || order.branchNameAr)}
                 </p>
                 <p className="text-[9px] md:text-[10px] font-black uppercase text-white/40 px-3 md:px-4 py-1 bg-white/5 rounded-full inline-block">
-                  {isRTL
-                    ? order.areaNameAr || order.areaName || order.selectedArea
-                    : order.areaName || order.areaNameAr || order.selectedArea}
+                  {isRTL ? (order.areaNameAr || order.areaName || order.selectedArea) : (order.areaName || order.areaNameAr || order.selectedArea)}
                 </p>
               </div>
             </div>
           </div>
           {order.notes && (
             <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-              <p className="text-[8px] font-black uppercase opacity-40 mb-1">
-                {t.notesLabel || "Notes"}
-              </p>
+              <p className="text-[8px] font-black uppercase opacity-40 mb-1">{t.notesLabel || "Notes"}</p>
               <p className="text-[10px] text-white/80 italic">{order.notes}</p>
             </div>
           )}
           <div className="space-y-2 py-4 border-y border-white/5">
             {order.items.map((item: any, i: number) => (
-              <div
-                key={i}
-                className={cn(
-                  "flex justify-between text-xs md:text-sm",
-                  isRTL && "flex-row-reverse",
-                )}
-              >
-                <span className="opacity-60">
-                  {item.quantity}x {item.name}
-                </span>
-                <span className="font-mono whitespace-nowrap">
-                  {item.price * item.quantity} {t.egp}
-                </span>
+              <div key={i} className={cn("flex justify-between text-xs md:text-sm", isRTL && "flex-row-reverse")}>
+                <span className="opacity-60">{item.quantity}x {item.name}</span>
+                <span className="font-mono whitespace-nowrap">{item.price * item.quantity} {t.egp}</span>
               </div>
             ))}
           </div>
           <div className="space-y-2 pt-2">
-            <div
-              className={cn(
-                "flex justify-between text-[9px] md:text-[10px] uppercase font-black opacity-40 italic",
-                isRTL && "flex-row-reverse",
-              )}
-            >
-              <span>{t.subtotal}</span>
-              <span className="whitespace-nowrap">
-                {order.subtotal || order.total - (order.deliveryFee || 0)}{" "}
-                {t.egp}
-              </span>
+            <div className={cn("flex justify-between text-[9px] md:text-[10px] uppercase font-black opacity-40 italic", isRTL && "flex-row-reverse")}>
+               <span>{t.subtotal}</span>
+               <span className="whitespace-nowrap">{order.subtotal || (order.total - (order.deliveryFee || 0))} {t.egp}</span>
             </div>
-            <div
-              className={cn(
-                "flex justify-between text-[9px] md:text-[10px] uppercase font-black opacity-40 italic",
-                isRTL && "flex-row-reverse",
-              )}
-            >
-              <span>{t.deliveryFee}</span>
-              <span className="text-primary whitespace-nowrap">
-                {order.deliveryFee || 0} {t.egp}
-              </span>
+            <div className={cn("flex justify-between text-[9px] md:text-[10px] uppercase font-black opacity-40 italic", isRTL && "flex-row-reverse")}>
+               <span>{t.deliveryFee}</span>
+               <span className="text-primary whitespace-nowrap">{order.deliveryFee || 0} {t.egp}</span>
             </div>
-            <div
-              className={cn(
-                "flex justify-between items-center pt-4 border-t border-white/10",
-                isRTL && "flex-row-reverse",
-              )}
-            >
-              <span className="text-xs font-black uppercase text-white italic">
-                {t.finalAmount}
-              </span>
-              <span className="text-xl md:text-2xl font-black text-primary italic glow-orange-sm whitespace-nowrap">
-                {order.total} {t.egp}
-              </span>
+            <div className={cn("flex justify-between items-center pt-4 border-t border-white/10", isRTL && "flex-row-reverse")}>
+               <span className="text-xs font-black uppercase text-white italic">{t.finalAmount}</span>
+               <span className="text-xl md:text-2xl font-black text-primary italic glow-orange-sm whitespace-nowrap">{order.total} {t.egp}</span>
             </div>
           </div>
         </div>
         <div className="w-full lg:w-48 space-y-2">
-          <div
-            className={cn(
-              "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2",
-            )}
-          >
-            {["Preparing", "Out for Delivery", "Completed"].map((s) => (
-              <button
-                key={s}
-                onClick={() =>
-                  onStatusChange(order._id, s, order.status, order.deliveryFee)
-                }
-                disabled={
-                  order.status === "Completed" ||
-                  order.status === "Cancelled" ||
-                  order.status === s
-                }
-                className={cn(
-                  "w-full py-4 lg:py-3 rounded-xl text-[10px] font-black uppercase border transition-all",
-                  order.status === s
-                    ? "bg-white text-black border-white"
-                    : "bg-white/5 text-white/40 border-white/5 hover:border-primary/40",
-                )}
-              >
-                {statusMap[s] || s}
-              </button>
-            ))}
-          </div>
-          {order.status === "Pending" && (
-            <button
-              onClick={() =>
-                onStatusChange(order._id, "Cancelled", order.status)
-              }
-              className="w-full py-4 lg:py-3 rounded-xl text-[10px] font-black uppercase border border-red-500/50 text-red-500 hover:bg-red-500/10 mt-2"
-            >
-              {t.cancelOrder}
-            </button>
-          )}
-          {order.status === "Cancelled" && order.cancelReason && (
-            <div className="p-4 bg-red-500/5 rounded-xl border border-red-500/10">
-              <p className="text-[8px] font-black uppercase opacity-40 mb-1">
-                {t.cancelReason}
-              </p>
-              <p className="text-[10px] text-red-500 font-bold italic">
-                {order.cancelReason}
-              </p>
-            </div>
-          )}
-          <button
-            onClick={() => onDelete(order._id)}
-            className="w-full py-4 lg:py-3 rounded-xl text-[10px] font-black uppercase text-red-500/40 hover:text-red-500 mt-4"
-          >
-            <Trash2 size={12} className="inline mr-2" />{" "}
-            {isRTL ? "حذف" : "Delete"}
-          </button>
+           <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2")}>
+             {["Preparing", "Out for Delivery", "Completed"].map(s => (
+               <button key={s} onClick={() => onStatusChange(order._id, s, order.status, order.deliveryFee)} disabled={order.status === "Completed" || order.status === "Cancelled" || order.status === s} className={cn("w-full py-4 lg:py-3 rounded-xl text-[10px] font-black uppercase border transition-all", order.status === s ? "bg-white text-black border-white" : "bg-white/5 text-white/40 border-white/5 hover:border-primary/40")}>
+                 {statusMap[s] || s}
+               </button>
+             ))}
+           </div>
+           {order.status === "Pending" && (
+             <button onClick={() => onStatusChange(order._id, "Cancelled", order.status)} className="w-full py-4 lg:py-3 rounded-xl text-[10px] font-black uppercase border border-red-500/50 text-red-500 hover:bg-red-500/10 mt-2">
+               {t.cancelOrder}
+             </button>
+           )}
+           {order.status === "Cancelled" && order.cancelReason && (
+             <div className="p-4 bg-red-500/5 rounded-xl border border-red-500/10">
+               <p className="text-[8px] font-black uppercase opacity-40 mb-1">{t.cancelReason}</p>
+               <p className="text-[10px] text-red-500 font-bold italic">{order.cancelReason}</p>
+             </div>
+           )}
+           <button onClick={() => onDelete(order._id)} className="w-full py-4 lg:py-3 rounded-xl text-[10px] font-black uppercase text-red-500/40 hover:text-red-500 mt-4"><Trash2 size={12} className="inline mr-2"/> {isRTL ? "حذف" : "Delete"}</button>
         </div>
       </div>
     </div>
