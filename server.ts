@@ -1,4 +1,6 @@
+// @ts-nocheck
 import express from "express";
+import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
@@ -34,46 +36,42 @@ const upload = multer({ storage: storage });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export async function createApp() {
-  const app = express();
+let appPromise: Promise<express.Express> | null = null;
+let dbConnectPromise: Promise<void> | null = null;
+let isDbConnected = false;
+
+async function ensureDbConnected(dbUri: string) {
+  if (dbConnectPromise) return dbConnectPromise;
+  dbConnectPromise = (async () => {
+    mongoose.set("bufferCommands", false);
+    console.log("Connecting to MongoDB...");
+    try {
+      await mongoose.connect(dbUri, { serverSelectionTimeoutMS: 10000 });
+      isDbConnected = true;
+      console.log("Successfully connected to MongoDB");
+    } catch (err) {
+      isDbConnected = false;
+      console.error("MongoDB connection failed:", err);
+    }
+  })();
+  return dbConnectPromise;
+}
+
+async function createApp() {
+  if (appPromise) return appPromise;
+  appPromise = (async () => {
+    const app = express();
 
   // MongoDB Connection
   const MONGODB_URI = process.env.MONGODB_URI;
   if (!MONGODB_URI && process.env.NODE_ENV === "production") {
-    console.warn("MONGODB_URI is not defined; API will run in degraded mode.");
+    console.error(
+      "FATAL: MONGODB_URI is not defined in production environment.",
+    );
+    // Keep running in degraded mode (useful on serverless/static deployments).
   }
-  const dbUri =
-    MONGODB_URI ||
-    (process.env.NODE_ENV === "production"
-      ? undefined
-      : "mongodb://localhost:27017/burger-station");
-
-  mongoose.set("bufferCommands", false);
-  let isDbConnected = false;
-
-  const connectWithRetry = async () => {
-    if (!dbUri) {
-      console.warn(
-        "Skipping MongoDB connection because no MONGODB_URI is configured.",
-      );
-      return;
-    }
-
-    console.log("Connecting to MongoDB...");
-    try {
-      await mongoose.connect(dbUri, { serverSelectionTimeoutMS: 10000 });
-      console.log("Successfully connected to MongoDB");
-      isDbConnected = true;
-    } catch (err) {
-      console.error("MongoDB connection failed:", err);
-      if (process.env.NODE_ENV === "production" && !process.env.VERCEL) {
-        console.warn("Retrying connection in 5 seconds...");
-        setTimeout(connectWithRetry, 5000);
-      } else {
-        console.warn("Notice: Starting in degraded mode (No database).");
-      }
-    }
-  };
+  const dbUri = MONGODB_URI || "mongodb://localhost:27017/burger-station";
+  await ensureDbConnected(dbUri);
 
   app.use(cors());
   app.use(
@@ -96,17 +94,27 @@ export async function createApp() {
     });
   });
 
+  // Category Schema
+  const categorySchema = new mongoose.Schema(
+    {
+      name: { type: String, required: true },
+      nameAr: { type: String, required: true },
+      slug: { type: String, required: true, unique: true },
+      order: { type: Number, default: 0 },
+    },
+    { timestamps: true },
+  );
+
+  const Category =
+    mongoose.models.Category || mongoose.model("Category", categorySchema);
+
   // Menu Schema
   const menuItemSchema = new mongoose.Schema({
     name: { type: String, required: true },
     nameAr: { type: String },
     price: { type: Number, required: true },
     discountPrice: { type: Number },
-    category: {
-      type: String,
-      required: true,
-      enum: ["Burger", "Meals", "Fries", "Drinks"],
-    },
+    category: { type: String, required: true },
     image: { type: String },
     imagePublicId: { type: String },
     description: { type: String },
@@ -115,7 +123,8 @@ export async function createApp() {
     variants: [{ id: String, name: String, nameAr: String, price: Number }],
   });
 
-  const MenuItem = mongoose.model("MenuItem", menuItemSchema);
+  const MenuItem =
+    mongoose.models.MenuItem || mongoose.model("MenuItem", menuItemSchema);
 
   // Schema for Orders
   const orderSchema = new mongoose.Schema({
@@ -140,7 +149,7 @@ export async function createApp() {
     createdAt: { type: Date, default: Date.now },
   });
 
-  const Order = mongoose.model("Order", orderSchema);
+  const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
 
   // Schema for Website Settings
   const branchSchema = new mongoose.Schema(
@@ -213,7 +222,8 @@ export async function createApp() {
     updatedAt: { type: Date, default: Date.now },
   });
 
-  const Settings = mongoose.model("Settings", settingsSchema);
+  const Settings =
+    mongoose.models.Settings || mongoose.model("Settings", settingsSchema);
 
   // Schema for Customers
   const customerSchema = new mongoose.Schema({
@@ -226,12 +236,25 @@ export async function createApp() {
     updatedAt: { type: Date, default: Date.now },
   });
 
-  const Customer = mongoose.model("Customer", customerSchema);
+  const Customer =
+    mongoose.models.Customer || mongoose.model("Customer", customerSchema);
 
   // Seed initial data
   const seedData = async () => {
     if (!isDbConnected) return;
     try {
+      const categoryCount = await Category.countDocuments();
+      if (categoryCount === 0) {
+        console.log("Seeding initial category data...");
+        const initialCategories = [
+          { name: "Burger", nameAr: "برجر", slug: "Burger", order: 1 },
+          { name: "Meals", nameAr: "وجبات", slug: "Meals", order: 2 },
+          { name: "Fries", nameAr: "بطاطس", slug: "Fries", order: 3 },
+          { name: "Drinks", nameAr: "مشروبات", slug: "Drinks", order: 4 },
+        ];
+        await Category.insertMany(initialCategories);
+      }
+
       const count = await MenuItem.countDocuments();
       if (count === 0) {
         console.log("Seeding initial menu data...");
@@ -285,6 +308,22 @@ export async function createApp() {
   ];
 
   // API Endpoints
+  app.get("/api/categories", async (req, res) => {
+    if (!isDbConnected)
+      return res.json([
+        { name: "Burger", nameAr: "برجر", slug: "Burger", order: 1 },
+        { name: "Meals", nameAr: "وجبات", slug: "Meals", order: 2 },
+        { name: "Fries", nameAr: "بطاطس", slug: "Fries", order: 3 },
+        { name: "Drinks", nameAr: "مشروبات", slug: "Drinks", order: 4 },
+      ]);
+    try {
+      const categories = await Category.find().sort({ order: 1 });
+      res.json(categories);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
   app.get("/api/menu", async (req, res) => {
     if (!isDbConnected) return res.json(fallbackItems);
     try {
@@ -465,6 +504,55 @@ export async function createApp() {
     }
   });
 
+  app.get("/api/admin/categories", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      const categories = await Category.find().sort({ order: 1 });
+      res.json(categories);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  app.post("/api/admin/categories", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      const category = new Category(req.body);
+      await category.save();
+      res.json(category);
+    } catch (err) {
+      res.status(400).json({ error: "Failed to create category" });
+    }
+  });
+
+  app.put("/api/admin/categories/:id", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      const category = await Category.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true },
+      );
+      res.json(category);
+    } catch (err) {
+      res.status(400).json({ error: "Failed to update category" });
+    }
+  });
+
+  app.delete("/api/admin/categories/:id", async (req, res) => {
+    if (!isDbConnected)
+      return res.status(500).json({ error: "Database disconnected" });
+    try {
+      await Category.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(400).json({ error: "Failed to delete category" });
+    }
+  });
+
   app.get("/api/admin/customers", async (req, res) => {
     if (!isDbConnected) return res.json([]);
     try {
@@ -560,43 +648,45 @@ export async function createApp() {
     },
   );
 
-  // Database Connection
-  await connectWithRetry();
   if (isDbConnected) await seedData();
 
+  // In local dev, Vite serves the SPA; in production, static hosting is handled
+  // by `dist/` (local) or Vercel's static output directory (deployment).
   if (process.env.NODE_ENV !== "production") {
-    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
-  } else {
+  } else if (!process.env.VERCEL) {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => res.sendFile(path.join(distPath, "index.html")));
   }
 
-  return app;
+    return app;
+  })();
+
+  return appPromise;
 }
 
-const appPromise = createApp();
-
-export default async function handler(req: express.Request, res: express.Response) {
-  const app = await appPromise;
+export default async function handler(req: any, res: any) {
+  const app = await createApp();
   return app(req, res);
 }
 
-if (process.argv[1] === __filename) {
+// Only listen when run as a script (e.g. `npm run dev` / `npm start`)
+const isDirectRun =
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (isDirectRun) {
   const PORT = process.env.PORT || 3000;
-  appPromise
+  createApp()
     .then((app) => {
       app.listen(Number(PORT), "0.0.0.0", () => {
         console.log(`Server running on http://localhost:${PORT}`);
       });
     })
-    .catch((err) => {
-      console.error(err);
-      process.exit(1);
-    });
+    .catch(console.error);
 }

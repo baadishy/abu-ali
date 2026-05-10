@@ -8,7 +8,7 @@
     "build": "vite build && tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json",
     "start": "NODE_ENV=production tsx server.ts",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
+    "clean": "node --input-type=module -e \"import { rmSync } from 'fs'; rmSync('dist',{recursive:true,force:true}); rmSync('dist-server',{recursive:true,force:true});\"",
     "lint": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

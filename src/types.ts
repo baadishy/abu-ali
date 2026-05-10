@@ -1,4 +1,10 @@
-export type Category = "Burger" | "Meals" | "Fries" | "Drinks";
+export interface Category {
+  _id?: string;
+  name: string;
+  nameAr: string;
+  slug: string;
+  order: number;
+}
 
 export interface ItemVariant {
   id: string;
@@ -13,7 +19,7 @@ export interface MenuItem {
   nameAr?: string;
   price: number;
   discountPrice?: number;
-  category: Category;
+  category: string; // Category slug
   image?: string;
   imagePublicId?: string;
   description?: string;
@@ -73,7 +79,7 @@ export interface PromotionalOffer {
   type: "buy_x_get_y" | "fixed_discount" | "percentage_discount" | "manual";
   buyQuantity?: number;
   getQuantity?: number;
-  categoryLimit?: Category;
+  categoryLimit?: string; // Category slug
   discountValue?: number;
   branchIds?: string[];
 }

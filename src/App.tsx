@@ -24,8 +24,6 @@ import { cn } from "./lib/utils";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import { NotificationProvider, useNotification } from "./NotificationContext";
 
-const CATEGORIES: Category[] = ["Burger", "Meals", "Fries", "Drinks"];
-
 const PageLoader = () => (
   <div className="min-h-screen flex flex-col items-center justify-center bg-background">
     <motion.div
@@ -61,6 +59,7 @@ function AppContent() {
     window.location.pathname,
   );
   const [menuItems, setMenuItems] = React.useState<MenuItem[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
   const [cart, setCart] = React.useState<CartItem[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("burger_station_cart");
@@ -70,7 +69,7 @@ function AppContent() {
   });
   const [isCartOpen, setIsCartOpen] = React.useState(false);
   const [selectedItem, setSelectedItem] = React.useState<MenuItem | null>(null);
-  const [activeCategory, setActiveCategory] = React.useState<Category | "All">(
+  const [activeCategory, setActiveCategory] = React.useState<string | "All">(
     "All",
   );
   const [settings, setSettings] = React.useState<SiteSettings | null>(null);
@@ -94,7 +93,7 @@ function AppContent() {
 
     const init = async () => {
       setLoading(true);
-      await Promise.all([fetchMenuItems(), fetchSettings()]);
+      await Promise.all([fetchMenuItems(), fetchSettings(), fetchCategories()]);
       setLoading(false);
     };
     init();
@@ -157,6 +156,18 @@ function AppContent() {
       setMenuItems(data);
     } catch (err) {
       console.error("Error fetching menu:", err);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      if (res.ok) {
+        const data = await res.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error("Fetch categories error:", error);
     }
   };
 
@@ -496,7 +507,7 @@ function AppContent() {
               </p>
             </div>
             <CategoryFilter
-              categories={CATEGORIES}
+              categories={categories}
               activeCategory={activeCategory}
               onCategoryChange={setActiveCategory}
             />

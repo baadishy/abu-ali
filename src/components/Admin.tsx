@@ -79,16 +79,45 @@ export function Admin() {
     if (isLoggedIn) {
       if (activeTab === "orders") fetchOrders();
       if (activeTab === "users") fetchCustomers();
-      if (activeTab === "menu") fetchItems();
+      if (activeTab === "menu") {
+        fetchItems();
+        fetchCategories();
+      }
     }
   }, [activeTab, isLoggedIn]);
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch("/api/admin/categories");
+      if (!res.ok) throw new Error("Failed to fetch categories");
+      const data = await res.json();
+      setCategories(data);
+    } catch (err) {
+      console.error("Fetch categories error:", err);
+    }
+  };
+
   const [items, setItems] = React.useState<MenuItem[]>([]);
+  const [categories, setCategories] = React.useState<Category[]>([]);
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [customers, setCustomers] = React.useState<Customer[]>([]);
   const [siteSettings, setSiteSettings] = React.useState<SiteSettings | null>(
     null,
   );
+
+  const [inventorySubTab, setInventorySubTab] = React.useState<
+    "items" | "categories"
+  >("items");
+
+  const [categoryFormData, setCategoryFormData] = React.useState({
+    name: "",
+    nameAr: "",
+    slug: "",
+    order: 0,
+  });
+  const [editingCategoryId, setEditingCategoryId] = React.useState<
+    string | null
+  >(null);
 
   const [offerFormData, setOfferFormData] = React.useState<PromotionalOffer>({
     id: "",
@@ -125,6 +154,9 @@ export function Admin() {
     onConfirm: () => void;
     isDangerous?: boolean;
   } | null>(null);
+  const [expandedBranches, setExpandedBranches] = React.useState<
+    Record<string, boolean>
+  >({});
 
   const getStatusTranslation = (status: string) => {
     const s = status.toLowerCase();
@@ -149,7 +181,7 @@ export function Admin() {
     nameAr: "",
     price: 0,
     discountPrice: 0 as number | undefined,
-    category: "Burger" as Category,
+    category: "",
     image: "",
     imagePublicId: "",
     description: "",
@@ -203,9 +235,56 @@ export function Admin() {
     return () => clearTimeout(timer);
   }, [offerFormData.description, offerFormData.descriptionAr]);
 
-  const [expandedBranches, setExpandedBranches] = React.useState<
-    Record<string, boolean>
-  >({});
+  const handleSubmitCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const url = editingCategoryId
+        ? `/api/admin/categories/${editingCategoryId}`
+        : "/api/admin/categories";
+      const method = editingCategoryId ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(categoryFormData),
+      });
+      if (res.ok) {
+        showNotification(
+          "success",
+          isRTL ? "تم حفظ التصنيف" : "Category saved",
+        );
+        setCategoryFormData({ name: "", nameAr: "", slug: "", order: 0 });
+        setEditingCategoryId(null);
+        fetchCategories();
+      }
+    } catch (err) {
+      console.error("Save category error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteCategory = async (id: string) => {
+    setGenericConfirm({
+      title: isRTL ? "حذف التصنيف" : "Delete Category",
+      message: isRTL
+        ? "هل أنت متأكد من حذف هذا التصنيف؟"
+        : "Are you sure you want to delete this category?",
+      isDangerous: true,
+      onConfirm: async () => {
+        try {
+          await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
+          fetchCategories();
+          showNotification(
+            "success",
+            isRTL ? "تم حذف التصنيف" : "Category deleted",
+          );
+        } catch (err) {
+          console.error("Delete category error:", err);
+        }
+      },
+    });
+  };
 
   // Auto-populate branchIds for new offers if empty
   React.useEffect(() => {
@@ -1379,526 +1458,721 @@ export function Admin() {
               key="menu"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="w-full grid grid-cols-1"
+              className="w-full space-y-8"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-                <div className="lg:col-span-4 xl:col-span-3">
-                  <div className="bg-[#1A1A1A] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-white/5 sticky top-32">
-                    <h2 className="text-xl font-black italic uppercase mb-6">
-                      {editingItem ? t.editFuel : t.newFuel}
-                    </h2>
-                    <form
-                      onSubmit={handleSubmit}
-                      className="space-y-4 md:space-y-6"
-                    >
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <div
-                              className={cn(
-                                "flex justify-between items-center",
-                                isRTL && "flex-row-reverse",
-                              )}
-                            >
-                              <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                {t.nameEn}
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() => translateField("name", true)}
-                                className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                              >
-                                <Languages size={8} /> {t.translate} AR
-                              </button>
-                            </div>
-                            <input
-                              placeholder={t.nameEn}
-                              className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all"
-                              value={formData.name}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  name: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <div
-                              className={cn(
-                                "flex justify-between items-center",
-                                isRTL && "flex-row-reverse",
-                              )}
-                            >
-                              <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                {t.nameAr}
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() => translateField("name", false)}
-                                className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                              >
-                                <Languages size={8} /> {t.translate} EN
-                              </button>
-                            </div>
-                            <input
-                              placeholder={t.nameAr}
-                              className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all"
-                              value={formData.nameAr}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  nameAr: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
+              <div className={cn("flex gap-2", isRTL && "flex-row-reverse")}>
+                {[
+                  { id: "items", label: t.itemsTab, icon: Utensils },
+                  { id: "categories", label: t.categories, icon: Package },
+                ].map((sub) => (
+                  <button
+                    key={sub.id}
+                    onClick={() => setInventorySubTab(sub.id as any)}
+                    className={cn(
+                      "flex items-center gap-2 px-6 py-3 rounded-xl font-black uppercase text-[9px] tracking-widest transition-all border",
+                      inventorySubTab === sub.id
+                        ? "bg-white text-black border-white"
+                        : "bg-white/5 text-white/40 border-white/5",
+                    )}
+                  >
+                    <sub.icon size={12} />
+                    {sub.label}
+                  </button>
+                ))}
+              </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <div
-                              className={cn(
-                                "flex justify-between items-center",
-                                isRTL && "flex-row-reverse",
-                              )}
-                            >
-                              <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                {t.descriptionEn}
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  translateField("description", true)
-                                }
-                                className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
+              {inventorySubTab === "items" ? (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+                  <div className="lg:col-span-4 xl:col-span-3">
+                    <div className="bg-[#1A1A1A] rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 border border-white/5 sticky top-32">
+                      <h2 className="text-xl font-black italic uppercase mb-6">
+                        {editingItem ? t.editFuel : t.newFuel}
+                      </h2>
+                      <form
+                        onSubmit={handleSubmit}
+                        className="space-y-4 md:space-y-6"
+                      >
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <div
+                                className={cn(
+                                  "flex justify-between items-center",
+                                  isRTL && "flex-row-reverse",
+                                )}
                               >
-                                <Languages size={8} /> {t.translate} AR
-                              </button>
-                            </div>
-                            <textarea
-                              placeholder={t.descriptionEn}
-                              className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
-                              value={formData.description}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  description: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                          <div className="space-y-1">
-                            <div
-                              className={cn(
-                                "flex justify-between items-center",
-                                isRTL && "flex-row-reverse",
-                              )}
-                            >
-                              <label className="text-[8px] uppercase font-black opacity-30 px-2">
-                                {t.descriptionAr}
-                              </label>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  translateField("description", false)
-                                }
-                                className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
-                              >
-                                <Languages size={8} /> {t.translate} EN
-                              </button>
-                            </div>
-                            <textarea
-                              placeholder={t.descriptionAr}
-                              className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
-                              value={formData.descriptionAr}
-                              onChange={(e) =>
-                                setFormData({
-                                  ...formData,
-                                  descriptionAr: e.target.value,
-                                })
-                              }
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div
-                          className={cn(
-                            "flex items-center justify-between",
-                            isRTL && "flex-row-reverse",
-                          )}
-                        >
-                          <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40">
-                            {t.sizesAndVariants}
-                          </h4>
-                          <button
-                            type="button"
-                            onClick={addVariant}
-                            className="text-[10px] font-black uppercase text-primary hover:scale-110 transition-transform"
-                          >
-                            + {t.addSize}
-                          </button>
-                        </div>
-
-                        <div className="space-y-2">
-                          {formData.variants.map((variant) => (
-                            <div
-                              key={variant.id}
-                              className={cn(
-                                "grid grid-cols-12 gap-2 bg-white/5 p-3 rounded-xl border border-white/5 group",
-                                isRTL && "flex-row-reverse",
-                              )}
-                            >
-                              <div className="col-span-4 relative group/v">
-                                <input
-                                  placeholder={t.nameEn}
-                                  className="w-full bg-black/20 p-2 pr-8 rounded text-[10px] outline-none border border-transparent focus:border-primary/30"
-                                  value={variant.name}
-                                  onChange={(e) =>
-                                    updateVariant(
-                                      variant.id,
-                                      "name",
-                                      e.target.value,
-                                    )
-                                  }
-                                />
+                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                                  {t.nameEn}
+                                </label>
                                 <button
                                   type="button"
-                                  onClick={async () => {
-                                    const translated = await translateText(
-                                      variant.name,
-                                      "en",
-                                      "ar",
-                                    );
-                                    if (translated)
-                                      updateVariant(
-                                        variant.id,
-                                        "nameAr",
-                                        translated,
-                                      );
-                                  }}
-                                  className="absolute right-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
+                                  onClick={() => translateField("name", true)}
+                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
                                 >
-                                  <Languages size={10} />
-                                </button>
-                              </div>
-                              <div className="col-span-4 relative group/v">
-                                <input
-                                  placeholder={t.nameAr}
-                                  className="w-full bg-black/20 p-2 pl-8 rounded text-[10px] text-right outline-none border border-transparent focus:border-primary/30"
-                                  value={variant.nameAr}
-                                  onChange={(e) =>
-                                    updateVariant(
-                                      variant.id,
-                                      "nameAr",
-                                      e.target.value,
-                                    )
-                                  }
-                                />
-                                <button
-                                  type="button"
-                                  onClick={async () => {
-                                    const translated = await translateText(
-                                      variant.nameAr,
-                                      "ar",
-                                      "en",
-                                    );
-                                    if (translated)
-                                      updateVariant(
-                                        variant.id,
-                                        "name",
-                                        translated,
-                                      );
-                                  }}
-                                  className="absolute left-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
-                                >
-                                  <Languages size={10} />
+                                  <Languages size={8} /> {t.translate} AR
                                 </button>
                               </div>
                               <input
-                                type="number"
-                                placeholder={t.egp}
-                                className="col-span-3 bg-black/20 p-2 rounded text-[10px] outline-none"
-                                value={variant.price}
+                                placeholder={t.nameEn}
+                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all"
+                                value={formData.name}
                                 onChange={(e) =>
-                                  updateVariant(
-                                    variant.id,
-                                    "price",
-                                    parseInt(e.target.value),
-                                  )
+                                  setFormData({
+                                    ...formData,
+                                    name: e.target.value,
+                                  })
                                 }
                               />
-                              <button
-                                type="button"
-                                onClick={() => removeVariant(variant.id)}
-                                className="col-span-1 flex items-center justify-center text-red-500 opacity-20 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X size={14} />
-                              </button>
                             </div>
-                          ))}
-                        </div>
-                      </div>
+                            <div className="space-y-1">
+                              <div
+                                className={cn(
+                                  "flex justify-between items-center",
+                                  isRTL && "flex-row-reverse",
+                                )}
+                              >
+                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                                  {t.nameAr}
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => translateField("name", false)}
+                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
+                                >
+                                  <Languages size={8} /> {t.translate} EN
+                                </button>
+                              </div>
+                              <input
+                                placeholder={t.nameAr}
+                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all"
+                                value={formData.nameAr}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    nameAr: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
 
-                      <div className="grid grid-cols-1 gap-4">
-                        <div className="space-y-1">
-                          <label
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <div
+                                className={cn(
+                                  "flex justify-between items-center",
+                                  isRTL && "flex-row-reverse",
+                                )}
+                              >
+                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                                  {t.descriptionEn}
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    translateField("description", true)
+                                  }
+                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
+                                >
+                                  <Languages size={8} /> {t.translate} AR
+                                </button>
+                              </div>
+                              <textarea
+                                placeholder={t.descriptionEn}
+                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
+                                value={formData.description}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    description: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <div
+                                className={cn(
+                                  "flex justify-between items-center",
+                                  isRTL && "flex-row-reverse",
+                                )}
+                              >
+                                <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                                  {t.descriptionAr}
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    translateField("description", false)
+                                  }
+                                  className="text-[8px] font-black bg-primary/10 text-primary px-2 py-0.5 rounded flex items-center gap-1 hover:bg-primary hover:text-black transition-all"
+                                >
+                                  <Languages size={8} /> {t.translate} EN
+                                </button>
+                              </div>
+                              <textarea
+                                placeholder={t.descriptionAr}
+                                className="bg-white/5 border border-white/10 p-4 rounded-xl text-sm text-right w-full focus:border-primary outline-none transition-all min-h-[100px] resize-none"
+                                value={formData.descriptionAr}
+                                onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    descriptionAr: e.target.value,
+                                  })
+                                }
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div
                             className={cn(
-                              "text-[8px] font-black uppercase opacity-40 mx-2 block",
-                              isRTL && "text-right",
+                              "flex items-center justify-between",
+                              isRTL && "flex-row-reverse",
                             )}
                           >
-                            {t.originalPrice}
+                            <h4 className="text-[10px] font-black uppercase tracking-widest opacity-40">
+                              {t.sizesAndVariants}
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={addVariant}
+                              className="text-[10px] font-black uppercase text-primary hover:scale-110 transition-transform"
+                            >
+                              + {t.addSize}
+                            </button>
+                          </div>
+
+                          <div className="space-y-2">
+                            {formData.variants.map((variant) => (
+                              <div
+                                key={variant.id}
+                                className={cn(
+                                  "grid grid-cols-12 gap-2 bg-white/5 p-3 rounded-xl border border-white/5 group",
+                                  isRTL && "flex-row-reverse",
+                                )}
+                              >
+                                <div className="col-span-4 relative group/v">
+                                  <input
+                                    placeholder={t.nameEn}
+                                    className="w-full bg-black/20 p-2 pr-8 rounded text-[10px] outline-none border border-transparent focus:border-primary/30"
+                                    value={variant.name}
+                                    onChange={(e) =>
+                                      updateVariant(
+                                        variant.id,
+                                        "name",
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      const translated = await translateText(
+                                        variant.name,
+                                        "en",
+                                        "ar",
+                                      );
+                                      if (translated)
+                                        updateVariant(
+                                          variant.id,
+                                          "nameAr",
+                                          translated,
+                                        );
+                                    }}
+                                    className="absolute right-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
+                                  >
+                                    <Languages size={10} />
+                                  </button>
+                                </div>
+                                <div className="col-span-4 relative group/v">
+                                  <input
+                                    placeholder={t.nameAr}
+                                    className="w-full bg-black/20 p-2 pl-8 rounded text-[10px] text-right outline-none border border-transparent focus:border-primary/30"
+                                    value={variant.nameAr}
+                                    onChange={(e) =>
+                                      updateVariant(
+                                        variant.id,
+                                        "nameAr",
+                                        e.target.value,
+                                      )
+                                    }
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      const translated = await translateText(
+                                        variant.nameAr,
+                                        "ar",
+                                        "en",
+                                      );
+                                      if (translated)
+                                        updateVariant(
+                                          variant.id,
+                                          "name",
+                                          translated,
+                                        );
+                                    }}
+                                    className="absolute left-1 top-1.5 text-white/20 hover:text-primary transition-colors opacity-0 group-hover/v:opacity-100"
+                                  >
+                                    <Languages size={10} />
+                                  </button>
+                                </div>
+                                <input
+                                  type="number"
+                                  placeholder={t.egp}
+                                  className="col-span-3 bg-black/20 p-2 rounded text-[10px] outline-none"
+                                  value={variant.price}
+                                  onChange={(e) =>
+                                    updateVariant(
+                                      variant.id,
+                                      "price",
+                                      parseInt(e.target.value),
+                                    )
+                                  }
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => removeVariant(variant.id)}
+                                  className="col-span-1 flex items-center justify-center text-red-500 opacity-20 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4">
+                          <div className="space-y-1">
+                            <label
+                              className={cn(
+                                "text-[8px] font-black uppercase opacity-40 mx-2 block",
+                                isRTL && "text-right",
+                              )}
+                            >
+                              {t.originalPrice}
+                            </label>
+                            <input
+                              type="number"
+                              placeholder="Price"
+                              className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm transition-all focus:border-primary"
+                              value={formData.price || ""}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  price: parseInt(e.target.value) || 0,
+                                })
+                              }
+                            />
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowSale(!showSale)}
+                            className={cn(
+                              "w-full py-3 rounded-xl border flex items-center justify-center gap-2 text-[8px] font-black uppercase transition-all",
+                              showSale
+                                ? "bg-primary/20 border-primary text-primary"
+                                : "bg-white/5 border-white/10 text-white/40",
+                            )}
+                          >
+                            {showSale ? <Check size={10} /> : <Zap size={10} />}
+                            {isRTL
+                              ? "تفعيل العروض / الخصومات"
+                              : "Activate Sale / Offers"}
+                          </button>
+
+                          <AnimatePresence>
+                            {showSale && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="grid grid-cols-2 gap-4 pb-2">
+                                  <div className="space-y-1">
+                                    <label
+                                      className={cn(
+                                        "text-[8px] font-black uppercase opacity-40 mx-2 block",
+                                        isRTL && "text-right",
+                                      )}
+                                    >
+                                      {t.discountPercentage}
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="%"
+                                      className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
+                                      value={discountPercent || ""}
+                                      onChange={(e) =>
+                                        handlePercentChange(
+                                          parseInt(e.target.value) || 0,
+                                        )
+                                      }
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label
+                                      className={cn(
+                                        "text-[8px] font-black uppercase opacity-40 mx-2 block",
+                                        isRTL && "text-right",
+                                      )}
+                                    >
+                                      {t.discountPrice}
+                                    </label>
+                                    <input
+                                      type="number"
+                                      placeholder="0 = No Sale"
+                                      className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
+                                      value={formData.discountPrice || ""}
+                                      onChange={(e) =>
+                                        setFormData({
+                                          ...formData,
+                                          discountPrice:
+                                            parseInt(e.target.value) || 0,
+                                        })
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                        <select
+                          className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm outline-none focus:border-primary transition-all"
+                          value={formData.category}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              category: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="" disabled className="bg-[#1A1A1A]">
+                            {isRTL ? "اختر التصنيف" : "Select Category"}
+                          </option>
+                          {categories.map((cat) => (
+                            <option
+                              key={cat.slug}
+                              value={cat.slug}
+                              className="bg-[#1A1A1A]"
+                            >
+                              {isRTL ? cat.nameAr : cat.name}
+                            </option>
+                          ))}
+                        </select>
+                        <div
+                          className={cn(
+                            "flex items-center gap-4",
+                            isRTL && "flex-row-reverse",
+                          )}
+                        >
+                          <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
+                            {formData.image ? (
+                              <img
+                                src={formData.image}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <Camera className="opacity-20" />
+                            )}
+                            {uploading && (
+                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                <RefreshCw
+                                  className="animate-spin text-primary"
+                                  size={20}
+                                />
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-wait"
+                              disabled={uploading}
+                              onChange={handleImageUpload}
+                            />
+                          </div>
+                          <p className="text-[8px] uppercase font-black opacity-30">
+                            {isRTL ? "يفضل إضافة صورة" : "Image recommended"}
+                          </p>
+                        </div>
+                        <button
+                          type="submit"
+                          className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px]"
+                        >
+                          {editingItem ? t.editFuel : t.saveItem}
+                        </button>
+                        {editingItem && (
+                          <button
+                            type="button"
+                            onClick={resetForm}
+                            className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase"
+                          >
+                            {t.close}
+                          </button>
+                        )}
+                      </form>
+                    </div>
+                  </div>
+                  <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 md:gap-6">
+                    {items.map((item) => (
+                      <motion.div
+                        layout
+                        key={item._id}
+                        className="group bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 flex items-start sm:items-center gap-4 hover:border-primary/50 transition-all hover:bg-primary/5 cursor-pointer relative"
+                        onClick={() => handleEdit(item)}
+                      >
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-white/5 shrink-0">
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                          ) : null}
+                          {!item.isAvailable && (
+                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                              <span className="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-1 rounded">
+                                Out
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[8px] font-black uppercase text-primary/40 leading-none">
+                              {item.category}
+                            </span>
+                            {item.isAvailable && (
+                              <span className="w-1 h-1 bg-green-500 rounded-full" />
+                            )}
+                          </div>
+                          <h4 className="font-black text-sm uppercase truncate mb-1 group-hover:text-primary transition-colors">
+                            {language === "ar" ? item.nameAr : item.name}
+                          </h4>
+                          <div className="flex items-center gap-2">
+                            {item.discountPrice !== undefined &&
+                            item.discountPrice > 0 ? (
+                              <>
+                                <div className="flex flex-col">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-primary font-black italic text-base sm:text-lg leading-none">
+                                      {item.discountPrice}{" "}
+                                      <span className="text-[10px] uppercase not-italic opacity-40">
+                                        EGP
+                                      </span>
+                                    </p>
+                                    <span className="text-[7px] bg-primary text-black px-1.5 py-0.5 rounded-full font-black tracking-tighter">
+                                      SALE
+                                    </span>
+                                  </div>
+                                  <p className="text-white/20 line-through text-[10px] font-mono leading-none mt-1">
+                                    {item.price} EGP
+                                  </p>
+                                </div>
+                              </>
+                            ) : (
+                              <p className="text-primary font-black italic text-base sm:text-lg leading-none">
+                                {item.price}{" "}
+                                <span className="text-[10px] uppercase not-italic opacity-40">
+                                  EGP
+                                </span>
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex flex-row sm:flex-col gap-2 justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(item);
+                            }}
+                            className="p-3 bg-white/5 hover:bg-primary hover:text-black rounded-xl transition-all"
+                            title="Edit"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteItem(item._id, item.imagePublicId);
+                            }}
+                            className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+                  <div className="lg:col-span-4 xl:col-span-3">
+                    <div className="bg-[#1A1A1A] p-6 md:p-8 rounded-[2rem] border border-white/5 sticky top-32">
+                      <h2 className="text-xl font-black italic uppercase mb-6">
+                        {editingCategoryId ? t.editCategory : t.addCategory}
+                      </h2>
+                      <form
+                        onSubmit={handleSubmitCategory}
+                        className="space-y-4"
+                      >
+                        <div className="space-y-1">
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                            {t.categoryNameEn}
                           </label>
                           <input
-                            type="number"
-                            placeholder="Price"
-                            className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm transition-all focus:border-primary"
-                            value={formData.price || ""}
+                            placeholder={t.categoryNameEn}
+                            className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
+                            value={categoryFormData.name}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setCategoryFormData({
+                                ...categoryFormData,
+                                name: val,
+                                slug: val.toLowerCase().replace(/\s+/g, "-"),
+                              });
+                            }}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                            {t.categoryNameAr}
+                          </label>
+                          <input
+                            placeholder={t.categoryNameAr}
+                            className="w-full bg-white/5 p-4 rounded-xl text-sm text-right focus:border-primary outline-none transition-all"
+                            value={categoryFormData.nameAr}
                             onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                price: parseInt(e.target.value) || 0,
+                              setCategoryFormData({
+                                ...categoryFormData,
+                                nameAr: e.target.value,
                               })
                             }
                           />
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setShowSale(!showSale)}
-                          className={cn(
-                            "w-full py-3 rounded-xl border flex items-center justify-center gap-2 text-[8px] font-black uppercase transition-all",
-                            showSale
-                              ? "bg-primary/20 border-primary text-primary"
-                              : "bg-white/5 border-white/10 text-white/40",
-                          )}
-                        >
-                          {showSale ? <Check size={10} /> : <Zap size={10} />}
-                          {isRTL
-                            ? "تفعيل العروض / الخصومات"
-                            : "Activate Sale / Offers"}
-                        </button>
-
-                        <AnimatePresence>
-                          {showSale && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="grid grid-cols-2 gap-4 pb-2">
-                                <div className="space-y-1">
-                                  <label
-                                    className={cn(
-                                      "text-[8px] font-black uppercase opacity-40 mx-2 block",
-                                      isRTL && "text-right",
-                                    )}
-                                  >
-                                    {t.discountPercentage}
-                                  </label>
-                                  <input
-                                    type="number"
-                                    placeholder="%"
-                                    className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
-                                    value={discountPercent || ""}
-                                    onChange={(e) =>
-                                      handlePercentChange(
-                                        parseInt(e.target.value) || 0,
-                                      )
-                                    }
-                                  />
-                                </div>
-                                <div className="space-y-1">
-                                  <label
-                                    className={cn(
-                                      "text-[8px] font-black uppercase opacity-40 mx-2 block",
-                                      isRTL && "text-right",
-                                    )}
-                                  >
-                                    {t.discountPrice}
-                                  </label>
-                                  <input
-                                    type="number"
-                                    placeholder="0 = No Sale"
-                                    className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
-                                    value={formData.discountPrice || ""}
-                                    onChange={(e) =>
-                                      setFormData({
-                                        ...formData,
-                                        discountPrice:
-                                          parseInt(e.target.value) || 0,
-                                      })
-                                    }
-                                  />
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                      <select
-                        className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-sm"
-                        value={formData.category}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            category: e.target.value as Category,
-                          })
-                        }
-                      >
-                        <option value="Burger">Burger</option>
-                        <option value="Meals">Meals</option>
-                        <option value="Fries">Fries</option>
-                        <option value="Drinks">Drinks</option>
-                      </select>
-                      <div
-                        className={cn(
-                          "flex items-center gap-4",
-                          isRTL && "flex-row-reverse",
-                        )}
-                      >
-                        <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
-                          {formData.image ? (
-                            <img
-                              src={formData.image}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Camera className="opacity-20" />
-                          )}
-                          {uploading && (
-                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                              <RefreshCw
-                                className="animate-spin text-primary"
-                                size={20}
-                              />
-                            </div>
-                          )}
+                        <div className="space-y-1">
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                            {t.categorySlug}
+                          </label>
                           <input
-                            type="file"
-                            className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-wait"
-                            disabled={uploading}
-                            onChange={handleImageUpload}
+                            placeholder="category-slug"
+                            className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
+                            value={categoryFormData.slug}
+                            onChange={(e) =>
+                              setCategoryFormData({
+                                ...categoryFormData,
+                                slug: e.target.value,
+                              })
+                            }
                           />
                         </div>
-                        <p className="text-[8px] uppercase font-black opacity-30">
-                          {isRTL ? "يفضل إضافة صورة" : "Image recommended"}
-                        </p>
-                      </div>
-                      <button
-                        type="submit"
-                        className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px]"
-                      >
-                        {editingItem ? t.editFuel : t.saveItem}
-                      </button>
-                      {editingItem && (
+                        <div className="space-y-1">
+                          <label className="text-[8px] uppercase font-black opacity-30 px-2">
+                            {t.categoryOrder}
+                          </label>
+                          <input
+                            type="number"
+                            placeholder="0"
+                            className="w-full bg-white/5 p-4 rounded-xl text-sm focus:border-primary outline-none transition-all"
+                            value={categoryFormData.order}
+                            onChange={(e) =>
+                              setCategoryFormData({
+                                ...categoryFormData,
+                                order: parseInt(e.target.value) || 0,
+                              })
+                            }
+                          />
+                        </div>
                         <button
-                          type="button"
-                          onClick={resetForm}
-                          className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase"
+                          type="submit"
+                          disabled={loading}
+                          className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
                         >
-                          {t.close}
+                          {loading ? (
+                            <RefreshCw
+                              className="animate-spin mx-auto"
+                              size={16}
+                            />
+                          ) : editingCategoryId ? (
+                            t.editCategory
+                          ) : (
+                            t.saveCategory
+                          )}
                         </button>
-                      )}
-                    </form>
+                        {editingCategoryId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCategoryId(null);
+                              setCategoryFormData({
+                                name: "",
+                                nameAr: "",
+                                slug: "",
+                                order: 0,
+                              });
+                            }}
+                            className="w-full bg-white/5 text-white/40 py-2 rounded-xl text-[8px] font-black uppercase"
+                          >
+                            {t.cancel}
+                          </button>
+                        )}
+                      </form>
+                    </div>
+                  </div>
+                  <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    {categories.map((cat) => (
+                      <div
+                        key={cat._id}
+                        className="bg-[#1A1A1A] p-6 rounded-2xl border border-white/5 flex flex-col gap-4 relative group"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div
+                            className={cn(
+                              "flex flex-col",
+                              isRTL && "text-right",
+                            )}
+                          >
+                            <h3 className="font-black text-lg uppercase italic">
+                              {language === "ar" ? cat.nameAr : cat.name}
+                            </h3>
+                            <p className="text-[10px] font-mono opacity-20">
+                              {cat.slug}
+                            </p>
+                          </div>
+                          <div className="bg-primary/10 text-primary w-6 h-6 flex items-center justify-center rounded-lg text-[10px] font-black">
+                            {cat.order}
+                          </div>
+                        </div>
+                        <div className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg">
+                          <button
+                            onClick={() => {
+                              setEditingCategoryId(cat._id!);
+                              setCategoryFormData({
+                                name: cat.name,
+                                nameAr: cat.nameAr,
+                                slug: cat.slug,
+                                order: cat.order,
+                              });
+                            }}
+                            className="p-3 bg-white/5 hover:bg-primary hover:text-black rounded-xl transition-all"
+                          >
+                            <Edit2 size={14} />
+                          </button>
+                          <button
+                            onClick={() => deleteCategory(cat._id!)}
+                            className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="lg:col-span-8 xl:col-span-9 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 3xl:grid-cols-5 gap-4 md:gap-6">
-                  {items.map((item) => (
-                    <motion.div
-                      layout
-                      key={item._id}
-                      className="group bg-[#1A1A1A] p-4 rounded-2xl border border-white/5 flex items-start sm:items-center gap-4 hover:border-primary/50 transition-all hover:bg-primary/5 cursor-pointer relative"
-                      onClick={() => handleEdit(item)}
-                    >
-                      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-white/5 shrink-0">
-                        {item.image ? (
-                          <img
-                            src={item.image}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          />
-                        ) : null}
-                        {!item.isAvailable && (
-                          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <span className="text-[8px] font-black uppercase bg-red-500 text-white px-2 py-1 rounded">
-                              Out
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0 flex flex-col justify-center">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[8px] font-black uppercase text-primary/40 leading-none">
-                            {item.category}
-                          </span>
-                          {item.isAvailable && (
-                            <span className="w-1 h-1 bg-green-500 rounded-full" />
-                          )}
-                        </div>
-                        <h4 className="font-black text-sm uppercase truncate mb-1 group-hover:text-primary transition-colors">
-                          {language === "ar" ? item.nameAr : item.name}
-                        </h4>
-                        <div className="flex items-center gap-2">
-                          {item.discountPrice !== undefined &&
-                          item.discountPrice > 0 ? (
-                            <>
-                              <div className="flex flex-col">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-primary font-black italic text-base sm:text-lg leading-none">
-                                    {item.discountPrice}{" "}
-                                    <span className="text-[10px] uppercase not-italic opacity-40">
-                                      EGP
-                                    </span>
-                                  </p>
-                                  <span className="text-[7px] bg-primary text-black px-1.5 py-0.5 rounded-full font-black tracking-tighter">
-                                    SALE
-                                  </span>
-                                </div>
-                                <p className="text-white/20 line-through text-[10px] font-mono leading-none mt-1">
-                                  {item.price} EGP
-                                </p>
-                              </div>
-                            </>
-                          ) : (
-                            <p className="text-primary font-black italic text-base sm:text-lg leading-none">
-                              {item.price}{" "}
-                              <span className="text-[10px] uppercase not-italic opacity-40">
-                                EGP
-                              </span>
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex flex-row sm:flex-col gap-2 justify-center md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(item);
-                          }}
-                          className="p-3 bg-white/5 hover:bg-primary hover:text-black rounded-xl transition-all"
-                          title="Edit"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteItem(item._id, item.imagePublicId);
-                          }}
-                          className="p-3 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all"
-                          title="Delete"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+              )}
             </motion.div>
           )}
 
@@ -2271,27 +2545,27 @@ export function Admin() {
                             : "Limit to Category (Optional)"}
                         </label>
                         <div className="flex flex-wrap gap-2">
-                          {["Burger", "Side", "Drink", "Sauce"].map((cat) => (
+                          {categories.map((cat) => (
                             <button
-                              key={cat}
+                              key={cat.slug}
                               type="button"
                               onClick={() =>
                                 setOfferFormData({
                                   ...offerFormData,
                                   categoryLimit:
-                                    offerFormData.categoryLimit === cat
+                                    offerFormData.categoryLimit === cat.slug
                                       ? undefined
-                                      : (cat as Category),
+                                      : cat.slug,
                                 })
                               }
                               className={cn(
-                                "text-[10px] uppercase font-black px-4 py-2 rounded-lg border transition-all",
-                                offerFormData.categoryLimit === cat
+                                "text-[10px] uppercase font-black px-4 py-2 rounded-lg border transition-all shadow-lg",
+                                offerFormData.categoryLimit === cat.slug
                                   ? "bg-primary text-black border-primary"
-                                  : "bg-white/5 border-white/5 opacity-50",
+                                  : "bg-white/5 border-white/5 opacity-50 hover:opacity-100",
                               )}
                             >
-                              {cat}
+                              {language === "ar" ? cat.nameAr : cat.name}
                             </button>
                           ))}
                         </div>
