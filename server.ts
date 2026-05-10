@@ -316,6 +316,16 @@ export async function createApp() {
     }
   });
 
+  app.get("/api/admin/orders", async (req, res) => {
+    if (!isDbConnected) return res.json([]);
+    try {
+      const orders = await Order.find().sort({ createdAt: -1 });
+      res.json(orders);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch admin orders" });
+    }
+  });
+
   app.post("/api/admin/login", (req, res) => {
     const { adminId, password } = req.body;
     if (adminId === (process.env.ADMIN_ID || "admin66") && password === (process.env.ADMIN_PASSWORD || "admin123")) {
