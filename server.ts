@@ -337,6 +337,34 @@ async function startServer() {
     }
   });
 
+  app.post("/api/orders/:id/cancel", async (req, res) => {
+    if (!isDbConnected) return res.status(500).json({ error: "Database disconnected" });
+    try {
+      const { phone } = req.body;
+      const order = await Order.findById(req.params.id);
+      
+      if (!order) {
+        return res.status(404).json({ error: "Order not found" });
+      }
+      
+      if (order.phone !== phone) {
+        return res.status(403).json({ error: "Unauthorized to cancel this order" });
+      }
+      
+      if (order.status !== "Pending") {
+        return res.status(400).json({ error: "Only pending orders can be cancelled" });
+      }
+      
+      order.status = "Cancelled";
+      order.cancelReason = "Cancelled by customer";
+      await order.save();
+      
+      res.json(order);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to cancel order" });
+    }
+  });
+
   app.get("/api/delivery-fee", async (req, res) => {
     if (!isDbConnected) return res.json({ deliveryFee: 0 });
     try {

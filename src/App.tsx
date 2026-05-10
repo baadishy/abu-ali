@@ -64,6 +64,7 @@ function AppContent() {
   const [activeCategory, setActiveCategory] = React.useState<string | "All">("All");
    const [settings, setSettings] = React.useState<SiteSettings | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [flies, setFlies] = React.useState<{id: string, x: number, y: number, targetX: number, targetY: number, image: string}[]>([]);
 
    React.useEffect(() => {
@@ -221,6 +222,7 @@ function AppContent() {
   };
 
   const submitOrder = async (orderData: { name: string; phone: string; address: string; notes: string; deliveryFee: number; location: string; branchId: string; areaId?: string }) => {
+    setIsSubmitting(true);
     const selectedBranch = settings?.branches?.find(b => b.id === orderData.branchId);
     const branchPhone = selectedBranch?.phones?.[0]?.replace(/[^0-9]/g, '');
     const defaultWhatsapp = settings?.socialLinks?.whatsapp?.replace(/[^0-9]/g, '');
@@ -304,6 +306,7 @@ function AppContent() {
     } catch (err) {
       console.error("Failed to save order", err);
       showNotification("error", isRTL ? "فشل إرسال الطلب. يرجى المحاولة مرة أخرى." : "Failed to send order. Please try again.");
+      setIsSubmitting(false);
       return;
     }
     
@@ -342,6 +345,7 @@ function AppContent() {
     window.open(`https://wa.me/${whatsappNumber}?text=${encodedMessage}`, "_blank");
     setCart([]);
     setIsCartOpen(false);
+    setIsSubmitting(false);
     showNotification("success", isRTL ? "تم إرسال طلبك بنجاح!" : "Order sent successfully!");
   };
 
@@ -355,6 +359,29 @@ function AppContent() {
 
   return (
     <div className={cn("min-h-screen bg-background text-white selection:bg-primary selection:text-black overflow-x-hidden", isRTL && "font-arabic")}>
+      <AnimatePresence>
+        {isSubmitting && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center"
+          >
+            <motion.div
+              animate={{ 
+                scale: [1, 1.1, 1],
+                rotate: [0, 90, 180, 270, 360],
+              }}
+              transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full mb-8 shadow-[0_0_50px_rgba(255,185,0,0.3)]"
+            />
+            <h2 className="text-2xl font-black uppercase italic tracking-widest text-primary animate-pulse">
+              {isRTL ? "جاري تنفيذ المهمة..." : "EXECUTING MISSION..."}
+            </h2>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Navbar cartCount={cart.reduce((s, i) => s + i.quantity, 0)} onOpenCart={() => setIsCartOpen(true)} settings={settings} />
       
       <main>

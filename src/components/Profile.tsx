@@ -1,6 +1,8 @@
 import React from "react";
-import { User, Package, Calendar, MapPin, CheckCircle2 } from "lucide-react";
+import { User, Package, Calendar, MapPin, CheckCircle2, AlertTriangle, RefreshCw, X } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
+import { useNotification } from "../NotificationContext";
+import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
 
 interface Order {
@@ -25,6 +27,7 @@ interface Order {
 
 export function Profile() {
   const { t, isRTL, language } = useLanguage();
+  const { showNotification } = useNotification();
 
   const getStatusTranslation = (status: string) => {
     const s = status.toLowerCase();
@@ -44,6 +47,12 @@ export function Profile() {
   const [orders, setOrders] = React.useState<Order[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [saved, setSaved] = React.useState(false);
+  const [genericConfirm, setGenericConfirm] = React.useState<{
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    isDangerous?: boolean;
+  } | null>(null);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -98,13 +107,47 @@ export function Profile() {
       if (res.ok) {
         localStorage.setItem("burger_station_phone", phone);
         setSaved(true);
+        showNotification("success", t.profileSaved);
         setTimeout(() => setSaved(false), 3000);
+      } else {
+        showNotification("error", "Failed to update profile");
       }
     } catch (err) {
       console.error(err);
+      showNotification("error", "Connection error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const cancelOrder = async (orderId: string) => {
+    setGenericConfirm({
+      title: t.cancelOrder,
+      message: isRTL ? "هل أنت متأكد من إلغاء هذا الطلب؟" : "Are you sure you want to cancel this order?",
+      isDangerous: true,
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`/api/orders/${orderId}/cancel`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone, reason: "Cancelled by user" })
+          });
+          if (res.ok) {
+            showNotification("success", t.orderCancelled);
+            fetchOrders(phone);
+          } else {
+            const data = await res.json();
+            showNotification("error", data.error || "Failed to cancel order");
+          }
+        } catch (err) {
+          showNotification("error", "Connection error");
+        } finally {
+          setLoading(false);
+          setGenericConfirm(null);
+        }
+      }
+    });
   };
 
   return (
@@ -196,6 +239,15 @@ export function Profile() {
                     </div>
                   </div>
 
+                  {order.status === "Pending" && (
+                    <button
+                      onClick={() => cancelOrder(order._id)}
+                      className="mb-6 w-full py-2 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95"
+                    >
+                      {t.cancelOrder}
+                    </button>
+                  )}
+
                   <div className="flex flex-wrap gap-3 mb-6 text-[10px] font-bold uppercase tracking-wider text-white/50">
                     <div className={cn("flex flex-col gap-1", isRTL && "items-end")}>
                       <span className="text-[8px] opacity-40">{t.branch || "Branch"}</span>
@@ -283,6 +335,27 @@ export function Profile() {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {genericConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-md">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-[#1A1A1A] p-10 rounded-[2.5rem] border border-white/10 w-full max-w-sm text-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertTriangle className={cn("text-primary", genericConfirm.isDangerous && "text-red-500")} size={32} />
+              </div>
+              <h3 className="text-2xl font-black uppercase italic mb-2 tracking-tighter">{genericConfirm.title}</h3>
+              <p className="text-white/40 text-sm mb-8">{genericConfirm.message}</p>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <button onClick={() => setGenericConfirm(null)} className="py-4 bg-white/5 rounded-xl font-black uppercase text-[10px] hover:bg-white/10 transition-colors">{t.cancel}</button>
+                <button onClick={genericConfirm.onConfirm} disabled={loading} className={cn("py-4 rounded-xl font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2", genericConfirm.isDangerous ? "bg-red-500 text-white" : "bg-white text-black")}>
+                  {loading ? <RefreshCw className="animate-spin" size={14} /> : t.confirm}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -3,14 +3,13 @@ import {
   Upload, Plus, Trash2, Camera, LogOut, Package, Users, 
   Utensils, Edit2, Check, X, RefreshCw, Settings as SettingsIcon, 
   Facebook, Instagram, Phone, MapPin, Globe, ChevronRight, ChevronDown, AlertTriangle,
-  Zap, Languages, Save
+  Zap, Languages, Save, Sparkles
 } from "lucide-react";
 import { MenuItem, Category, SiteSettings, Area, ItemVariant, PromotionalOffer } from "../types";
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { useLanguage } from "../context/LanguageContext";
 import { useNotification } from "../NotificationContext";
-import { GoogleGenAI } from "@google/genai";
 
 type AdminTab = "menu" | "orders" | "users" | "offers" | "settings";
 
@@ -157,6 +156,37 @@ export function Admin() {
 
   const [discountPercent, setDiscountPercent] = React.useState<number>(0);
   const [showSale, setShowSale] = React.useState(false);
+  const [generatingImage, setGeneratingImage] = React.useState(false);
+
+  const fetchAutoImage = async () => {
+    if (!formData.description && !formData.name) {
+      showNotification("error", isRTL ? "يرجى إدخال الاسم أو الوصف أولاً" : "Please enter name or description first");
+      return;
+    }
+
+    setGeneratingImage(true);
+    try {
+      // Use clean keywords from description primarily, then name
+      const sourceText = `${formData.description} ${formData.name}`;
+      const keywords = sourceText
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, '')
+        .split(/\s+/)
+        .filter(w => w.length > 3) // Filter out short words
+        .slice(0, 4)
+        .join(',');
+
+      const imageUrl = `https://loremflickr.com/1024/1024/${encodeURIComponent(keywords || 'food')},food/all`;
+      
+      setFormData(prev => ({ ...prev, image: imageUrl, imagePublicId: "" }));
+      showNotification("success", isRTL ? "تم العثور على صورة مقترحة" : "Suggested image found");
+    } catch (err) {
+      console.error(err);
+      showNotification("error", isRTL ? "فشل في جلب الصورة" : "Failed to fetch image");
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
 
   // Auto-translation logic for Menu Items
   React.useEffect(() => {
@@ -228,6 +258,7 @@ export function Admin() {
       }
     } catch (err) {
       console.error("Save category error:", err);
+      showNotification("error", "Error saving category");
     } finally {
       setLoading(false);
     }
@@ -240,12 +271,18 @@ export function Admin() {
       isDangerous: true,
       onConfirm: async () => {
         try {
-          await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
-          fetchCategories();
-          showNotification("success", isRTL ? "تم حذف التصنيف" : "Category deleted");
+          const res = await fetch(`/api/admin/categories/${id}`, { method: "DELETE" });
+          if (res.ok) {
+            fetchCategories();
+            showNotification("success", isRTL ? "تم حذف التصنيف" : "Category deleted");
+          } else {
+            showNotification("error", "Failed to delete category");
+          }
         } catch (err) {
           console.error("Delete category error:", err);
+          showNotification("error", "Error deleting category");
         }
+        setGenericConfirm(null);
       }
     });
   };
@@ -660,21 +697,42 @@ export function Admin() {
     e.preventDefault();
     setLoading(true);
     try {
+      let currentFormData = { ...formData };
+      
+      // Auto-fetch image if missing
+      if (!currentFormData.image && !editingItem) {
+        showNotification("info", isRTL ? "جاري جلب صورة تلقائية..." : "Fetching auto-image...");
+        
+        const sourceText = `${currentFormData.description} ${currentFormData.name}`;
+        const keywords = sourceText
+          .toLowerCase()
+          .replace(/[^\w\s]/gi, '')
+          .split(/\s+/)
+          .filter(w => w.length > 3)
+          .slice(0, 4)
+          .join(',');
+
+        const imageUrl = `https://loremflickr.com/1024/1024/${encodeURIComponent(keywords || 'food')},food/all`;
+        currentFormData.image = imageUrl;
+      }
+
       const url = editingItem ? `/api/admin/menu/${editingItem._id}` : "/api/admin/menu";
       const method = editingItem ? "PUT" : "POST";
       
       const res = await fetch(url, {
         method: method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(currentFormData),
       });
       
       if (res.ok) {
         resetForm();
         fetchItems();
+        showNotification("success", editingItem ? (isRTL ? "تم تحديث الصنف" : "Item updated") : (isRTL ? "تم حفظ الصنف" : "Item saved"));
       }
     } catch (err) {
       console.error(err);
+      showNotification("error", "Error saving item");
     } finally {
       setLoading(false);
     }
@@ -771,31 +829,39 @@ export function Admin() {
       message: isRTL ? "هل أنت متأكد من حذف هذا العرض؟" : "Are you sure you want to delete this offer?",
       isDangerous: true,
       onConfirm: async () => {
-        const updatedOffers = siteSettings.offers?.filter(o => o.id !== id) || [];
-        
-        // Remove image from Cloudinary
-        if (imagePublicId) {
-          try {
-            await fetch("/api/admin/remove-image", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ public_id: imagePublicId }),
-            });
-          } catch (err) {
-            console.error("Failed to delete image from Cloudinary:", err);
+        setLoading(true);
+        try {
+          const updatedOffers = siteSettings.offers?.filter(o => o.id !== id) || [];
+          
+          // Remove image from Cloudinary
+          if (imagePublicId) {
+            try {
+              await fetch("/api/admin/remove-image", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ public_id: imagePublicId }),
+              });
+            } catch (err) {
+              console.error("Failed to delete image from Cloudinary:", err);
+            }
           }
-        }
 
-        const res = await fetch("/api/settings", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...siteSettings, offers: updatedOffers }),
-        });
-        if (res.ok) {
-          setSiteSettings({ ...siteSettings, offers: updatedOffers });
-          showNotification("success", t.deleteItem);
+          const res = await fetch("/api/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...siteSettings, offers: updatedOffers }),
+          });
+          if (res.ok) {
+            setSiteSettings({ ...siteSettings, offers: updatedOffers });
+            showNotification("success", t.deleteItem);
+          }
+        } catch (err) {
+          console.error(err);
+          showNotification("error", "Error deleting offer");
+        } finally {
+          setLoading(false);
+          setGenericConfirm(null);
         }
-        setGenericConfirm(null);
       }
     });
   };
@@ -815,6 +881,7 @@ export function Admin() {
       message: isRTL ? "هل أنت متأكد من حذف هذا الصنف من القائمة؟" : "Are you sure you want to delete this item from the menu?",
       isDangerous: true,
       onConfirm: async () => {
+        setLoading(true);
         try {
           // Remove image from Cloudinary
           if (imagePublicId) {
@@ -834,22 +901,31 @@ export function Admin() {
           showNotification("success", isRTL ? "تم حذف العنصر بنجاح" : "Item deleted successfully");
         } catch (err) {
           showNotification("error", "Failed to delete item");
+        } finally {
+          setLoading(false);
+          setGenericConfirm(null);
         }
-        setGenericConfirm(null);
       }
     });
   };
 
   const handleUpdateOrderStatus = async (orderId: string, status: string, reason?: string) => {
+    setLoading(true);
     try {
-      await fetch(`/api/admin/orders/${orderId}`, {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, cancelReason: reason }),
       });
-      fetchOrders();
+      if (res.ok) {
+        fetchOrders();
+        showNotification("success", isRTL ? "تم تحديث حالة الطلب" : "Order status updated");
+      }
     } catch (err) {
       console.error(err);
+      showNotification("error", "Error updating order");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -859,14 +935,17 @@ export function Admin() {
       message: isRTL ? "هل أنت متأكد من حذف هذا الطلب نهائياً؟" : "Are you sure you want to delete this order permanently?",
       isDangerous: true,
       onConfirm: async () => {
+        setLoading(true);
         try {
           await fetch(`/api/admin/orders/${id}`, { method: "DELETE" });
           fetchOrders();
           showNotification("success", isRTL ? "تم حذف الطلب" : "Order deleted");
         } catch (err) {
           showNotification("error", "Failed to delete order");
+        } finally {
+          setLoading(false);
+          setGenericConfirm(null);
         }
-        setGenericConfirm(null);
       }
     });
   };
@@ -965,15 +1044,24 @@ export function Admin() {
 
   const removeBranchArea = (branchId: string, areaId: string) => {
     if (!siteSettings) return;
-    setSiteSettings(prev => {
-      if (!prev) return prev;
-      const branches = (prev.branches || []).map(b => {
-        if (b.id === branchId) {
-          return { ...b, areas: (b.areas || []).filter(a => a.id !== areaId) };
-        }
-        return b;
-      });
-      return { ...prev, branches };
+    setGenericConfirm({
+      title: isRTL ? "حذف المنطقة" : "Delete Area",
+      message: isRTL ? "هل أنت متأكد من حذف هذه المنطقة؟" : "Are you sure you want to delete this area?",
+      isDangerous: true,
+      onConfirm: () => {
+        setSiteSettings(prev => {
+          if (!prev) return prev;
+          const branches = (prev.branches || []).map(b => {
+            if (b.id === branchId) {
+              return { ...b, areas: (b.areas || []).filter(a => a.id !== areaId) };
+            }
+            return b;
+          });
+          return { ...prev, branches };
+        });
+        setGenericConfirm(null);
+        showNotification("info", isRTL ? "تمت إزالة المنطقة من القائمة (يرجى الحفظ لتأكيد التغيير)" : "Area removed (Save settings to confirm)");
+      }
     });
   };
 
@@ -1079,8 +1167,9 @@ export function Admin() {
       showNotification("info", t.provideReason);
       return;
     }
+    setLoading(true);
     try {
-      await fetch(`/api/admin/orders/${confirmStatus.orderId}`, {
+      const res = await fetch(`/api/admin/orders/${confirmStatus.orderId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
@@ -1089,11 +1178,19 @@ export function Admin() {
           deliveryFee: confirmStatus.status === "Out for Delivery" ? deliveryFeeUpdate : undefined
         }),
       });
-      fetchOrders();
-      setConfirmStatus(null);
-      setCancelReason("");
+      if (res.ok) {
+        fetchOrders();
+        showNotification("success", isRTL ? "تم تحديث حالة الطلب" : "Order status updated");
+        setConfirmStatus(null);
+        setCancelReason("");
+      } else {
+        showNotification("error", "Update failed");
+      }
     } catch (err) {
       console.error(err);
+      showNotification("error", "Connection error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1428,7 +1525,7 @@ export function Admin() {
                       ))}
                     </select>
                     <div className={cn("flex items-center gap-4", isRTL && "flex-row-reverse")}>
-                      <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden">
+                      <div className="w-20 h-20 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 relative overflow-hidden group/img">
                         {formData.image ? (
                           <img src={formData.image} className="w-full h-full object-cover" />
                         ) : (
@@ -1445,8 +1542,28 @@ export function Admin() {
                           disabled={uploading}
                           onChange={handleImageUpload} 
                         />
+                        <button 
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); fetchAutoImage(); }}
+                          disabled={generatingImage}
+                          className="absolute bottom-1 right-1 bg-primary text-black p-1 rounded-lg opacity-0 group-hover/img:opacity-100 transition-opacity disabled:opacity-50"
+                          title="Generate Auto Image"
+                        >
+                          {generatingImage ? <RefreshCw className="animate-spin" size={12} /> : <Sparkles size={12} />}
+                        </button>
                       </div>
-                      <p className="text-[8px] uppercase font-black opacity-30">{isRTL ? "يفضل إضافة صورة" : "Image recommended"}</p>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-[8px] uppercase font-black opacity-30">{isRTL ? "يفضل إضافة صورة" : "Image recommended"}</p>
+                        <button 
+                          type="button" 
+                          onClick={fetchAutoImage}
+                          disabled={generatingImage}
+                          className="text-[8px] font-black uppercase text-primary hover:text-white flex items-center gap-1 transition-colors"
+                        >
+                          {generatingImage ? <RefreshCw className="animate-spin" size={8} /> : <Sparkles size={8} />}
+                          {isRTL ? "جلب صورة تلقائياً" : "Auto-Generate Image"}
+                        </button>
+                      </div>
                     </div>
                     <button type="submit" className="w-full bg-primary text-black py-4 rounded-xl font-black uppercase text-[10px]">
                       {editingItem ? t.editFuel : t.saveItem}
