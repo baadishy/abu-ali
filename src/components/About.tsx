@@ -15,13 +15,19 @@ export function About({ settings }: AboutProps) {
   return (
     <section id="about" className="max-w-screen-2xl mx-auto px-4 md:px-8 py-16 md:py-24 border-t border-white/5">
       <div className={cn("space-y-16", isRTL && "rtl")} dir={isRTL ? "rtl" : "ltr"}>
-        <div className={cn("max-w-3xl", isRTL ? "text-right" : "text-left")}>
-          <h2 className={cn("text-3xl md:text-5xl font-display font-black mb-6 uppercase tracking-tighter italic")}>
-            {t.aboutTitle}
-          </h2>
-          <p className={cn("text-white/60 text-sm md:text-lg leading-relaxed")}>
-            {t.aboutDescription}
-          </p>
+        <div className={cn("max-w-4xl flex flex-col md:flex-row items-center gap-8 md:gap-12", isRTL ? "text-right md:flex-row-reverse" : "text-left")}>
+          <div className="w-32 h-32 md:w-48 md:h-48 shrink-0 bg-primary rounded-[2.5rem] p-3 shadow-2xl shadow-primary/20 relative group">
+            <div className="absolute inset-0 bg-primary blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
+            <img src="/logo.png" alt="Abu Ali" className="w-full h-full object-contain relative z-10" />
+          </div>
+          <div>
+            <h2 className={cn("text-3xl md:text-5xl font-display font-black mb-6 uppercase tracking-tighter italic")}>
+              {t.aboutTitle}
+            </h2>
+            <p className={cn("text-white/60 text-sm md:text-lg leading-relaxed")}>
+              {t.aboutDescription}
+            </p>
+          </div>
         </div>
 
         <div className="space-y-12">

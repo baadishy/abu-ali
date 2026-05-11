@@ -18,33 +18,58 @@ import { cn } from "./lib/utils";
 import { LanguageProvider, useLanguage } from "./context/LanguageContext";
 import { NotificationProvider, useNotification } from "./NotificationContext";
 
-const PageLoader = () => (
-  <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-    <motion.div 
-      animate={{ 
-        scale: [1, 1.2, 1],
-        rotate: [0, 180, 360],
-        opacity: [0.5, 1, 0.5]
-      }} 
-      transition={{ 
-        repeat: Infinity, 
-        duration: 2,
-        ease: "easeInOut"
-      }} 
-      className="w-16 h-16 bg-primary rounded-3xl shadow-2xl shadow-primary/20 flex items-center justify-center"
-    >
-      <div className="w-8 h-8 border-4 border-black/20 border-t-black rounded-full animate-spin" />
-    </motion.div>
-    <motion.p 
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-      className="mt-8 text-primary font-black uppercase italic tracking-widest text-xs"
-    >
-      Loading Burger Station...
-    </motion.p>
-  </div>
-);
+const PageLoader = () => {
+  let lang = 'en';
+  try {
+    const context = useLanguage();
+    if (context) lang = context.language;
+  } catch (e) {
+    // Ignore error if context is not available
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white">
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.1, 1],
+          opacity: [0.8, 1, 0.8]
+        }} 
+        transition={{ 
+          repeat: Infinity, 
+          duration: 2,
+          ease: "easeInOut"
+        }} 
+        className="w-32 h-32 md:w-48 md:h-48 bg-primary rounded-[2.5rem] shadow-2xl shadow-primary/20 flex items-center justify-center overflow-hidden p-3"
+      >
+        <img 
+          src="/logo.png" 
+          alt="Loading" 
+          className="w-full h-full object-contain"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mt-12 text-center"
+      >
+         <p className="text-primary font-black uppercase italic tracking-[0.3em] text-sm md:text-base px-6">
+          {lang === 'ar' ? 'أبو علي فرايد تشيكن' : 'ABU ALI FRIED CHICKEN'}
+        </p>
+        <div className="h-1 w-12 bg-white/10 mx-auto mt-4 rounded-full overflow-hidden">
+          <motion.div 
+            animate={{ x: [-48, 48] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            className="h-full w-full bg-primary"
+          />
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 function AppContent() {
   const { t, language, isRTL } = useLanguage();
@@ -451,7 +476,7 @@ function AppContent() {
         <div className="max-w-screen-2xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8 text-[8px] md:text-[10px] uppercase font-black tracking-[0.2em] text-white/40 text-center md:text-left">
             <div className="order-2 md:order-1">
-              © {new Date().getFullYear()} {settings?.storeName || "Burger Station"}. {isRTL ? "جميع الحقوق محفوظة." : "All Rights Reserved."}
+              © {new Date().getFullYear()} {settings?.storeName || "Abu Ali Fried Chicken"}. {isRTL ? "جميع الحقوق محفوظة." : "All Rights Reserved."}
             </div>
             
             <div className={cn("flex flex-wrap justify-center gap-4 md:gap-10 order-1 md:order-2", isRTL && "flex-row-reverse")}>

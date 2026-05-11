@@ -1,0 +1,21 @@
+{
+  "name": "أبو علي فرايد تشيكن | Abu Ali Fried Chicken",
+  "short_name": "Abu Ali",
+  "description": "أفضل دجاج مقلي وساندوتشات برجر في المنطقة. جودة عالية وطعم لا يقاوم.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#FFB900",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
