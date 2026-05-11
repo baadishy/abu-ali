@@ -1,156 +1,132 @@
-# Burger Station - Enterprise Ordering System
+# أبو علي فرايد تشيكن | Abu Ali Fried Chicken 🍗
 
-A premium, full-stack smashed burger online ordering system built for speed, conversion, and operational efficiency. This application features a custom promotional engine, localized multilingual support (Arabic/English), and a secure admin dashboard for real-time menu and site management.
-
----
-
-## 🏗 System Architecture
-
-The application is built as a full-stack JavaScript application using the following architecture:
-
-- **Frontend**: A Single Page Application (SPA) built with React and Vite. It uses Tailwind CSS for utility-first styling and Framer Motion for high-quality animations.
-- **Backend**: A Node.js Express server that handles API requests, database interactions, and production static file serving.
-- **Database**: MongoDB (Mongoose ODM) for persistent storage of menu items, orders, customers, and settings.
-- **Media Storage**: Cloudinary for optimized image delivery and management.
+Welcome to the official repository for **Abu Ali Fried Chicken**, a high-performance, mobile-first ordering application designed for the modern food industry. This system combines the power of React, Node.js, and MongoDB to deliver a seamless customer experience from browsing to checkout.
 
 ---
 
-## 📂 Project Structure
+## 🏛 Project Identity & Branding
 
-```text
-├── server.ts            # Main application entry point (Express + Vite + DB)
-├── deliveryService.ts   # Logic for calculating complex delivery fees
-├── vercel.json          # Vercel deployment configuration
-├── .env.example         # Template for environment variables
-├── src/
-│   ├── main.tsx         # Frontend entry point
-│   ├── App.tsx          # Root React component (Routing, State Management)
-│   ├── types.ts         # Centralized TypeScript interfaces
-│   ├── translations.ts  # English/Arabic translation dictionary
-│   ├── components/      # Modular React components
-│   │   ├── Admin.tsx    # Comprehensive management dashboard
-│   │   ├── Navbar.tsx   # Responsive navigation with cart trigger
-│   │   ├── Cart.tsx     # Order management and checkout flow
-│   │   ├── About.tsx    # Location and branch information
-│   │   └── ...          # Atomic UI components (MenuCard, etc.)
-│   ├── context/         # React Context stores (Language, Notifications)
-│   └── lib/             # Utilities and helpers (utils.ts)
-```
+The application has been fully customized for the **Abu Ali** brand:
+- **Brand Name**: Abu Ali Fried Chicken (أبو علي فرايد تشيكن).
+- **Core Aesthetic**: Professional food catalog design with high-contrast typography and fluid motion.
+- **Visuals**: Features the custom "Abu Ali" logo and branding throughout the app, including loading screens and PWA icons.
 
 ---
 
 ## 🚀 Key Features
 
-### 🛒 Ordering Experience
-- **Fluid UI**: Built with React and Framer Motion for smooth transitions and high-end feel.
-- **Dynamic Cart**: Real-time subtotal calculation with automatic discount application.
-- **WhatsApp Integration**: Seamlessly sends formatted orders directly to the restaurant's WhatsApp business account.
-- **Lazy Loading**: Code splitting used for non-critical modules (Admin, Profile, About) resulting in ~40% faster initial loads.
+### 🛒 Ordering & Checkout
+- **Real-time Cart**: Instant calculation of subtotals, delivery fees, and promotional discounts.
+- **WhatsApp Integration**: Orders are formatted and sent directly to the branch's WhatsApp, ensuring zero-latency communication.
+- **Multilingual (L10n)**: Full support for **Arabic (RTL)** and **English (LTR)** with instant language switching.
+- **Profile System**: Saves customer details (Phone, Address) locally for faster future orders.
 
-### 🏷️ Advanced Promotional Engine
-A specialized logic layer (`promoUtils.ts`) that handles:
-- **Buy X Get Y Free**: Automatically applies "Cheapest Item Free" logic.
-- **Fixed & Percentage Discounts**: Automated savings calculated on eligible cart items.
+### 🍱 Dynamic Menu Catalog
+- **Category Filtering**: Seamlessly switch between Burgers, Meals, Fries, and Drinks.
+- **Variants & Add-ons**: Support for different sizes and options for each menu item.
+- **Visual Excellence**: Images managed via Cloudinary for blazing-fast load times through a Global CDN.
 
-### 🛡️ Admin Dashboard
-- **Secure Access**: Protected via environmental authentication.
-- **Menu Management**: CRUD operations with Cloudinary-backed image optimization.
-- **Site Settings**: Customize operating hours (including 24/7 support), store name, and branch details.
+### 🛡️ Management Dashboard
+- **Menu Management**: Full CRUD (Create, Read, Update, Delete) for menu items.
+- **Live Orders**: Real-time order monitoring with status updates (Pending, Out for Delivery, Completed).
+- **Global Settings**: Control branch locations, delivery fees per area, social links, and operating hours.
+- **Promotional Engine**: Complex logic for "Buy X Get Y" or percentage-based discounts.
 
----
-
-## 📡 API Documentation
-
-All API routes start with `/api`.
-
-### Menu
-- `GET /api/menu`: Returns all available items (Cached/Seeded fallback if DB is down).
-- `GET /api/admin/menu`: Returns all items including hidden ones (Admin only).
-
-### Orders
-- `POST /api/orders`: Submits a new order.
-- `GET /api/orders/:phone`: Fetches order history for a specific customer.
-- `GET /api/admin/orders`: List all orders in the system.
-
-### Settings
-- `GET /api/settings`: Returns public site configuration.
-- `PUT /api/settings`: Updates global settings (Store name, Social, Hours).
-
-### Support
-- `GET /api/health`: Provides system status (DB connection status and uptime).
+### 📱 Progressive Web App (PWA)
+- **Installable**: Users can add the app to their home screen on iOS and Android.
+- **Offline Support**: Core assets are cached via Service Workers for availability even in poor network conditions.
+- **Native Look**: Includes a custom manifest, theme colors, and splash screens for a native app feel.
 
 ---
 
-## 🗄 Database Design
+## 📂 System Architecture
 
-### MenuItem Schema
-Items displayed in the menu. Support for categories, variants (sizes), and availability toggles.
-
-### Order Schema
-Captures snapshots of items at purchase time, customer details, delivery location, and order status (Pending, Confirmed, Cancelled).
-
-### Settings Schema
-A singleton document storing:
-- Multi-branch configurations.
-- Delivery areas and fees.
-- Promotional banners and logic.
-- Operating hours (including 24h toggle).
-
----
-
-## ⚡ Performance Optimizations
-
-### 1. Lazy Loading (Code Splitting)
-Significant parts of the application are loaded only when needed:
-- `Admin Panel`: Only downloaded when the user accesses the management routes.
-- `Profile`: User history is loaded on demand.
-- `About`: Non-critical static content is deferred.
-
-### 2. Backend Efficiency
-- **Compression**: Gzip compression is enabled for all responses to reduce payload size.
-- **Helmet**: Secure headers are applied to mitigate XSS and other common threats.
-- **Fast Startup**: The app starts even if the database is lagging, using local fallbacks until a connection is established.
-
-### 3. Image Optimization
-Images are served through Cloudinary, which automatically:
-- Converts images to modern formats (WebP/AVIF).
-- Resizes images based on device requirements.
-- Provides a global CDN for low-latency delivery.
+```text
+├── server.ts            # Express server (API routes, DB models, Vite middleware)
+├── deliveryService.ts   # Logic for calculating area-based delivery fees
+├── public/              # Static assets (logo, manifest, service worker)
+├── src/
+│   ├── App.tsx          # Main routing and global state (Cart, User, Settings)
+│   ├── components/      # Reusable UI components (Navbar, Cart, Profile)
+│   │   ├── Admin.tsx    # Secure management panel
+│   │   ├── About.tsx    # Location and branch info
+│   │   └── ...
+│   ├── context/         # React Context (Language, Notifications)
+│   ├── translations.ts  # Multilingual dictionary
+│   └── types.ts         # TypeScript definitions
+```
 
 ---
 
-## 🚀 Deployment Guide
+## ⚡ Tech Stack
 
-### Vercel Deployment (Recommended)
-1.  **Repository**: Push the code to a GitHub/GitLab repository.
-2.  **Project Creation**: Link the repository in Vercel.
-3.  **Environment Variables**:
-    - Add `MONGODB_URI` from MongoDB Atlas.
-    - Add `CLOUDINARY_*` keys from your Cloudinary dashboard.
-    - Set `ADMIN_ID` and `ADMIN_PASSWORD`.
-    - Set `NODE_ENV=production`.
-4.  **Automatic Build**: Vercel will use the `vercel.json` and `npm run build` to deploy the server and assets.
-
-### Scaling Configuration
-For high-traffic environments:
-- Use **MongoDB Atlas** for managed scaling and automated backups.
-- Scale **Vercel Functions** to professional tier for longer timeout limits if processing large datasets.
-- Enable **Vercel Analytics** to monitor user performance in real-time.
+| Layer | Technology |
+| :--- | :--- |
+| **Frontend** | React 18, Vite, TypeScript |
+| **Styling** | Tailwind CSS 4, Framer Motion |
+| **Backend** | Node.js, Express |
+| **Database** | MongoDB (Mongoose) |
+| **Media** | Cloudinary (Image Hosting & Optimization) |
+| **Icons** | Lucide React |
 
 ---
 
-## 🛠 Maintenance & SEO
+## 🛠 Installation & Setup
 
-- **Robots.txt**: Located in `/public/robots.txt` to guide search engine crawlers.
-- **Meta Tags**: Optimized in `index.html` for social sharing (OpenGraph) and local SEO.
-- **Logs**: Backend logs provide visibility into database connection attempts and order processing status.
+### 1. Prerequisites
+- Node.js (v18+)
+- MongoDB Atlas Account (or local MongoDB)
+- Cloudinary Account (for image uploads)
+
+### 2. Quick Start
+```bash
+# Install dependencies
+npm install
+
+# Set up environment
+cp .env.example .env
+# Edit .env with your credentials
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
 
 ---
 
-## ⚙️ Quick Start
+## ⚙️ Environment Variables
 
-1. **Install**: `npm install`
-2. **Configure**: Copy `.env.example` to `.env` and provide your secrets.
-3. **Run Dev**: `npm run dev`
-4. **Build**: `npm run build`
-5. **Start**: `npm start`
+The following variables must be configured in your `.env` file or hosting provider:
+
+| Variable | Description |
+| :--- | :--- |
+| `MONGODB_URI` | Your MongoDB connection string. |
+| `ADMIN_ID` | The username for the admin dashboard (Default: `admin66`). |
+| `ADMIN_PASSWORD` | The password for the admin dashboard. |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name. |
+| `CLOUDINARY_API_KEY` | Cloudinary API key. |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret. |
+| `PORT` | The server port (Default: `3000`). |
+
+---
+
+## 🔒 Security & Performance
+- **Optimized Loading**: Code-splitting ensures that the heavy Admin dashboard is only downloaded when needed.
+- **Secure API**: Admin routes are protected via authenticated session checks.
+- **Data Integrity**: Uses Mongoose schemas to ensure consistent data storage for orders and settings.
+- **Image CDN**: Automated resizing and WebP conversion via Cloudinary to minimize bandwidth usage.
+
+---
+
+## 👨‍💻 Maintenance & SEO
+- **SEO Ready**: Optimized meta tags and `robots.txt` for search engine visibility.
+- **Logging**: Detailed backend logs for order tracking and database health monitoring.
+- **Scalable**: Built to handle multi-branch operations with ease.
+
+---
+© 2026 Abu Ali Fried Chicken. Crafted for flavor and performance.
